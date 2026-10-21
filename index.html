@@ -436,6 +436,8 @@ function mapMetric(l){
   if(l.startsWith('PRODUCID'))return 'producidas';
   return null;
 }
+const TEAM_NAMES={'CORDOBA':'Córdoba','JOAQUIN':'Joaquín','MALAGA':'Málaga','CADIZ':'Cádiz','SEVILLA':'Sevilla','HUELVA':'Huelva','JAEN':'Jaén','ALMERIA':'Almería'};
+const teamLabel=l=>TEAM_NAMES[norm(l)]||titleCase(String(l).trim());
 function parseWorkbook(wb){
   const out={to:[],com:[],tec:[],warnings:[],kinds:new Set(),roster:{to:[],com:[],tec:[]}};
   for(const sheetName of wb.SheetNames){
@@ -461,7 +463,7 @@ function parseWorkbook(wb){
     const label=norm(head[0]);
     const team=kind==='to'?'Sala T.O.':kind==='tec'?'Consultores técnicos'
       :(grps.has('VIP')||grps.has('VIP Biofy')||label==='VIP')?SPECIAL
-      :titleCase(label||sheetName.replace(/\b(ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)\w*\b.*$/i,'').trim());
+      :teamLabel(label||norm(sheetName.replace(/\b(ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)\w*\b.*$/i,'')));
     let curDate=null,lastDate=null,foundDate=false,orderIssue=null;
     const posNames=new Map(),recs=[],names=new Set();
     for(let r=hr+2;r<rows.length;r++){
@@ -512,7 +514,7 @@ let versions=[];
 const charts={};
 
 /* ============================== CLOUD (GitHub) ============================== */
-const CLOUD={"owner":"Juan-biofy","repo":"panel-datos","branch":"main","dir":"versiones","read":{"n":600000,"s":"qE2wZzEY9N1MhgfjT8APGA==","i":"FHsKJWmgWeT8OeX7","c":"k4FgEroXIu/9L05nP6QciCJcssj3mAeV5U4xa6tJYqNoeGPF9DITY0buxg76V/W1xuiyChcHKb3xk2kdTiTY50T8f38gmZ+ns06SqrbGfPSu8uH5G5ZcU5TvMPlALWGgM4+WGCls3NglwUwGVw=="},"write":{"n":600000,"s":"GyCYJAJ9tVh2Z6t9eUlgHw==","i":"qNQdKxX6Jhzn5kwl","c":"INU6vhOVfpemsQXidTWX72tjq5sEIIxpQIIblTZHrTJlq4iczEBQXvj2uFT0yV/IOHbj1+UqaaPvoVGgN+g+cgaQT7N02vIW54QXgNnsNEfArD2fL54j3w3x7dybqg3tu8LoxLlde+UJzvuBrQ=="}};
+const CLOUD={"owner":"Juan-biofy","repo":"panel-datos","branch":"main","dir":"versiones","read":{"n":600000,"s":"ahsd49HiLNQLlJJ/fIMrzg==","i":"X07fhgXYbuaPHtjH","c":"uf3TWcPxNtdsDIPFBIguSbYhjYCH9INMNFOLHyfJ3KsncbUEDQtMJC183mF10MR7zegvyMiudE3vmbhIx8mIJRkatu0DQ3cHJUPKXOKrriGhDoVo63bOLPkxKub2NkLcBR+Cxibith225gAvDg=="},"write":{"n":600000,"s":"YwjIbVxs+cU2UgGm82+tqQ==","i":"W84XjM7ZK+AGfq51","c":"SNa8vyeU4NpS+8Li0BFbALvn2AujL5tDSmYZQuzwu7mcnPQOE7QO9NcTIDz6Cz+wvOM1QZ6kobjre6GSJ27+ZapMB+fIHd8Tn7X/jxmNv8Q7AzhGR6PVjV8u3oPKn5vyGsIO3VH5KNH6O0/JOw=="}};
 const cloudOn=!!(CLOUD&&CLOUD.owner&&CLOUD.repo);
 const gh={read:null,write:null};
 const b64e=str=>{const b=new TextEncoder().encode(str);let s='';for(let i=0;i<b.length;i+=0x8000)s+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000));return btoa(s);};
