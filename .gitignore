@@ -1,0 +1,9 @@
+# Nunca a git: datos de la empresa, contraseñas y dependencias
+node_modules/
+datos/
+informes/
+secretos*.json
+*.xlsm
+*.xlsx
+*.numbers
+.DS_Store
