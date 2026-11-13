@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Culligan Biofy · Panel Comercial</title>
-<link rel="icon" href="data:image/png;base64,__LOGO__">
+<link rel="icon" href="data:image/svg+xml;base64,__LOGO__">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -15,7 +15,7 @@
   --bg:#f5f5f7; --surface:#ffffff; --surface-2:#fafafc; --surface-3:#f0f0f3;
   --line:#e8e8ed; --line-2:#d2d2d7;
   --ink:#1d1d1f; --ink-2:#515154; --ink-3:#86868b;
-  --brand:#0071e3; --brand-2:#2997ff; --brand-soft:#e8f2fd; --brand-ink:#0062c4;
+  --brand:#2968fe; --brand-2:#5a8bff; --brand-soft:#e9effe; --brand-ink:#1a4fd6;
   --reg:#5b9cf6; --reg-soft:#eaf2fe; --lead:#ff9f52; --lead-soft:#fff2e6;
   --good:#1d8a4a; --good-soft:#e5f5eb; --warn:#a86300; --warn-soft:#fff3df; --bad:#cc3333; --bad-soft:#fdeceb;
   --r:20px; --r-sm:14px;
@@ -26,8 +26,8 @@
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Inter,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-feature-settings:"tnum" 1;letter-spacing:-.005em}
-h1,h2,h3,h4{margin:0;font-weight:600;letter-spacing:-.022em}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 Montserrat,-apple-system,BlinkMacSystemFont,"Helvetica Neue","Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-feature-settings:"tnum" 1;letter-spacing:0}
+h1,h2,h3,h4{margin:0;font-weight:600;letter-spacing:-.012em}
 button,input,select{font:inherit;color:inherit}
 a{color:var(--brand)}
 .hidden{display:none!important}
@@ -37,17 +37,17 @@ a{color:var(--brand)}
 .top{background:rgba(255,255,255,.86);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
 .top .in{display:flex;align-items:center;gap:10px;min-height:var(--top);flex-wrap:wrap;padding:8px 20px}
 .brand{display:flex;align-items:center;gap:14px;margin-right:auto}
-.brand img{height:40px;width:auto;display:block}
+.brand img{height:50px;width:auto;display:block}
 .brand .sep{width:1px;height:28px;background:var(--line-2)}
 .brand .ttl{font-weight:500;color:var(--ink-3);font-size:13px;line-height:1.25}
 .brand .ttl b{display:block;color:var(--ink);font-weight:600;font-size:15px}
 .btn{border:1px solid var(--line-2);background:var(--surface);border-radius:11px;padding:8px 14px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;transition:background .15s,border-color .15s,color .15s,transform .12s}
 .btn:hover{background:var(--surface-3)}
 .btn:active{transform:scale(.97)}
-.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 2px 8px rgba(0,113,227,.25)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 2px 8px rgba(41,104,254,.25)}
 .btn.primary:hover{background:var(--brand-ink)}
 .btn.soft{background:var(--brand-soft);border-color:transparent;color:var(--brand-ink)}
-.btn.soft:hover{background:#dcebfc}
+.btn.soft:hover{background:#dbe5fe}
 .btn.ghost{border-color:transparent;background:transparent}
 .btn.sm{padding:5px 11px;font-size:13px;border-radius:9px}
 .btn.danger{color:var(--bad)}
@@ -80,7 +80,7 @@ a{color:var(--brand)}
 /* page header */
 .ph{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:14px}
 .ph .eyebrow{font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--brand)}
-.ph h1{font-size:30px;letter-spacing:-.03em;line-height:1.15;margin-top:2px}
+.ph h1{font-size:30px;letter-spacing:-.012em;line-height:1.15;margin-top:2px}
 .ph p{margin:4px 0 0;color:var(--ink-3);font-size:14px}
 .ph .right{margin-left:auto}
 .filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:4px 0 22px;border-bottom:1px solid var(--line);margin-bottom:22px}
@@ -111,11 +111,11 @@ a{color:var(--brand)}
 .sec-title .right{margin-left:auto}
 
 .kpi .k-l{font-size:12.5px;color:var(--ink-3);font-weight:500}
-.kpi .k-v{font-weight:600;font-size:32px;line-height:1.08;margin:8px 0 6px;letter-spacing:-.035em}
+.kpi .k-v{font-weight:600;font-size:32px;line-height:1.08;margin:8px 0 6px;letter-spacing:-.012em}
 .kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow-hi)}
 .kpi .k-s{color:var(--ink-2);font-size:12.5px}
 .kpi .k-d{display:inline-block;margin-top:8px;font-size:12px;font-weight:600;color:var(--brand-ink);background:var(--brand-soft);border-radius:7px;padding:1px 8px}
-.kpi.hl{background:linear-gradient(145deg,#0a7cf0 0%,#0060d6 100%);border-color:transparent;box-shadow:0 8px 28px rgba(0,113,227,.22)}
+.kpi.hl{background:linear-gradient(145deg,#3a76ff 0%,#1a4fd6 100%);border-color:transparent;box-shadow:0 8px 28px rgba(41,104,254,.22)}
 .kpi.hl .k-l,.kpi.hl .k-s{color:rgba(255,255,255,.82)}
 .kpi.hl .k-v{color:#fff}
 .kpi.hl .k-d{background:rgba(255,255,255,.18);color:#fff}
@@ -128,7 +128,7 @@ a{color:var(--brand)}
 .perday .pd-h span{font-size:12px;color:var(--ink-3)}
 .perday .pd{padding:16px 18px;border-left:1px solid var(--line)}
 .perday .pd .l{font-size:12px;color:var(--ink-3)}
-.perday .pd .v{font-size:24px;font-weight:600;letter-spacing:-.03em;line-height:1.2;margin-top:2px}
+.perday .pd .v{font-size:24px;font-weight:600;letter-spacing:-.012em;line-height:1.2;margin-top:2px}
 .perday .pd .s{font-size:11.5px;color:var(--ink-3)}
 
 /* origin compare cards */
@@ -139,7 +139,7 @@ a{color:var(--brand)}
 .ocard .oh .pill{font-size:11.5px;border-radius:99px;padding:1px 9px;background:var(--cs);color:var(--ink-2)}
 .ostats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 18px;margin-top:14px}
 .ostats .l{font-size:12px;color:var(--ink-3)}
-.ostats .v{font-size:22px;font-weight:600;letter-spacing:-.03em}
+.ostats .v{font-size:22px;font-weight:600;letter-spacing:-.012em}
 .ostats .s{font-size:11.5px;color:var(--ink-3)}
 
 /* hbars */
@@ -188,7 +188,7 @@ tr.zero td{color:var(--ink-3)}
 /* team cards */
 .tc-stats{display:flex;gap:24px;margin:14px 0 14px;flex-wrap:wrap}
 .tc-stats .l{font-size:12px;color:var(--ink-3)}
-.tc-stats .v{font-weight:600;font-size:24px;letter-spacing:-.02em}
+.tc-stats .v{font-weight:600;font-size:24px;letter-spacing:-.012em}
 .stack{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px;margin-bottom:8px;background:var(--surface-3)}
 .mini{font-size:12.5px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:4px 14px}
 .mini span{display:inline-flex;gap:6px;align-items:center}
@@ -217,7 +217,7 @@ tr.zero td{color:var(--ink-3)}
 .fs-lab b{display:block;font-weight:600;font-size:14px}
 .fs-lab span{font-size:12px;color:var(--ink-3)}
 .fs-track{display:flex;justify-content:center}
-.fs-bar{height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:17px;letter-spacing:-.02em;transition:width 1.1s var(--ease);min-width:56px;white-space:nowrap;box-shadow:inset 0 -1px 0 rgba(0,0,0,.06)}
+.fs-bar{height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:17px;letter-spacing:-.012em;transition:width 1.1s var(--ease);min-width:56px;white-space:nowrap;box-shadow:inset 0 -1px 0 rgba(0,0,0,.06)}
 .fs-pct{text-align:right;font-weight:600;font-size:14px}
 .fs-pct span{display:block;font-weight:400;font-size:11.5px;color:var(--ink-3)}
 .fs-drop{display:grid;grid-template-columns:118px 1fr 92px;gap:14px}
@@ -233,8 +233,8 @@ tr.zero td{color:var(--ink-3)}
 /* empty states */
 .welcome{padding:40px 20px 60px;max-width:1000px;margin:0 auto}
 .dropzone{border:1.5px dashed var(--line-2);border-radius:24px;background:var(--surface);padding:52px 24px;text-align:center;transition:.15s}
-.dropzone img{height:64px;margin-bottom:18px}
-.dropzone h2{font-size:24px;margin-bottom:8px;letter-spacing:-.02em}
+.dropzone img{height:80px;margin-bottom:18px}
+.dropzone h2{font-size:24px;margin-bottom:8px;letter-spacing:-.012em}
 .dropzone p{color:var(--ink-2);margin:6px 0}
 .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:26px auto 0;text-align:left;max-width:900px}
 .steps div{background:var(--surface-2);border-radius:14px;padding:14px 16px;font-size:13px;color:var(--ink-2)}
@@ -278,7 +278,7 @@ body.dragging #dropOverlay{display:grid}
 #lock{position:fixed;inset:0;z-index:100;background:radial-gradient(1200px 600px at 50% -10%,#e8f1fd 0%,var(--bg) 60%);display:grid;place-items:center;padding:24px}
 #lock.hidden{display:none}
 .lock-card{width:min(400px,100%);background:#fff;border-radius:24px;padding:36px 30px 28px;box-shadow:0 20px 60px rgba(0,0,0,.08);text-align:center;animation:fadeUp .6s var(--ease) both}
-.lock-card img{height:58px;margin-bottom:18px}
+.lock-card img{height:76px;margin-bottom:18px}
 .lock-card h2{font-size:21px;margin-bottom:4px}
 .lock-card p{color:var(--ink-3);font-size:13.5px;margin:0 0 20px}
 .lock-card input{width:100%;border:1px solid var(--line-2);border-radius:12px;padding:12px 14px;outline:none;font-size:15px;text-align:center}
@@ -322,7 +322,7 @@ body.dragging #dropOverlay{display:grid}
   .kpi .k-v{font-size:25px}
   .ph h1{font-size:24px}
   .brand .ttl,.brand .sep{display:none}
-  .brand img{height:34px}
+  .brand img{height:40px}
   .vsel{flex:1 1 100%;max-width:none;order:5}
   .btn .t-hide{display:none}
   .ostats{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -332,7 +332,7 @@ body.dragging #dropOverlay{display:grid}
 <body>
 <div id="lock" class="hidden">
   <form class="lock-card" id="lockForm" autocomplete="on">
-    <img src="data:image/png;base64,__LOGO__" alt="Culligan Biofy">
+    <img src="data:image/svg+xml;base64,__LOGO__" alt="Culligan Biofy">
     <h2>Panel comercial</h2>
     <p>Introduce la contraseña para ver los datos</p>
     <input type="text" name="username" value="panel" autocomplete="username" hidden>
@@ -346,7 +346,7 @@ body.dragging #dropOverlay{display:grid}
 <header class="top">
   <div class="in">
     <div class="brand">
-      <img src="data:image/png;base64,__LOGO__" alt="Culligan Biofy">
+      <img src="data:image/svg+xml;base64,__LOGO__" alt="Culligan Biofy">
       <div class="sep"></div>
       <div class="ttl"><b>Panel comercial</b>Producción y ventas</div>
     </div>
@@ -363,7 +363,7 @@ body.dragging #dropOverlay{display:grid}
 
 <div id="welcome" class="welcome">
   <div class="dropzone">
-    <img src="data:image/png;base64,__LOGO__" alt="">
+    <img src="data:image/svg+xml;base64,__LOGO__" alt="">
     <h2>Sube los Excel del mes</h2>
     <p>Arrastra aquí los archivos (Equipo Comercial y Sala T.O.) o <a href="#" id="pickLink">elígelos desde tu ordenador</a>.</p>
     <p class="muted" style="font-size:13px">Los archivos se leen en tu navegador y no se envían a ningún servidor.</p>
@@ -890,7 +890,7 @@ function renderBigFunnel(F,list){
   const w0=originWord(list);
   const stages=[{k:w0,d:'entregados a T.O.',n:t.ced},{k:'Citas',d:'concertadas',n:t.citas},{k:'Visitas',d:'del comercial',n:c.visitas},{k:'Demos',d:'realizadas',n:c.demos},{k:'Ventas',d:'cerradas',n:c.ventas}];
   const top=Math.max(1,stages[0].n);
-  const shades=list.length===1&&list[0]===LEAD?['#ffd1a8','#ffbb80','#ffa65c','#f28a3a','#de6f1f']:['#a9cbfb','#82b3f9','#5b9cf6','#2f84ee','#0067d6'];
+  const shades=list.length===1&&list[0]===LEAD?['#ffd1a8','#ffbb80','#ffa65c','#f28a3a','#de6f1f']:['#a9cbfb','#82b3f9','#5b9cf6','#3d78fe','#2968fe'];
   const w=n=>Math.max(9,Math.sqrt(n/top)*100);
   const pend=Math.max(0,t.ced-t.resueltos);
   const lw=w0.toLowerCase();
@@ -1423,7 +1423,7 @@ $('#importInput').onchange=async e=>{const f=e.target.files[0];e.target.value=''
 window.addEventListener('beforeunload',e=>{if(state.dirty&&hasAnyData()){e.preventDefault();e.returnValue='';}});
 
 /* ============================== BOOT ============================== */
-if(window.Chart){Chart.defaults.font.family='-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Inter, "Segoe UI", Roboto, sans-serif';Chart.defaults.color='#86868b';}
+if(window.Chart){Chart.defaults.font.family='Montserrat, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Roboto, sans-serif';Chart.defaults.color='#86868b';}
 async function startCloud(){
   try{await refreshVersions();}
   catch(e){

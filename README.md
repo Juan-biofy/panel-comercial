@@ -11,7 +11,7 @@ Panel de producción y ventas (comerciales, VIP, teleoperadoras y consultores t�
 |---|---|
 | `index.html` | La página publicada (montada, con las claves cifradas) |
 | `src/v3.html` | Código fuente de la página, sin claves |
-| `src/logo.png` | Logo que se incrusta al montar |
+| `src/logo-vertical-blue.svg` | Logo oficial (vertical, azul) que se incrusta al montar. `src/logo.png` es el antiguo |
 | `scripts/` | Montaje, cifrado, lectura del GLOBAL y PDF del Informe Comercial (ver `scripts/LEEME.md`) |
 
 **Nunca se suben aquí** (este repositorio es público): los Excel del mes, el GLOBAL (datos de clientes), los Informes Comerciales en PDF ni el fichero de contraseñas `secretos.json`. El `.gitignore` los deja fuera.
@@ -20,6 +20,6 @@ Panel de producción y ventas (comerciales, VIP, teleoperadoras y consultores t�
 ```
 export PATH=$HOME/bin:$PATH
 cd scripts
-node build.mjs --src ../src/v3.html --logo ../src/logo.png --secrets /ruta/fuera/secretos.json --out ../index.html
+node build.mjs --src ../src/v3.html --logo ../src/logo-vertical-blue.svg --secrets /ruta/fuera/secretos.json --out ../index.html
 ```
 Después: commit y push. GitHub Pages lo publica solo.
