@@ -7,3 +7,4 @@ secretos*.json
 *.xlsx
 *.numbers
 .DS_Store
+copias/
