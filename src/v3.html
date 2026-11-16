@@ -54,6 +54,8 @@ a{color:var(--brand)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn svg{width:16px;height:16px;flex:none}
 .vsel{position:relative;display:inline-flex;align-items:center;border:1px solid var(--line-2);border-radius:11px;background:var(--surface);padding-left:12px;max-width:360px;min-width:0}
+.fbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 18px}
+.heat{border-collapse:separate;border-spacing:3px}.heat td{text-align:center;min-width:34px;border-radius:6px;padding:6px 4px;font-weight:500}.heat th{vertical-align:bottom;padding:4px 2px}.heat th span{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;font-size:11.5px;font-weight:500;color:var(--ink-2)}
 .vsel .lb{font-size:12px;color:var(--ink-3);white-space:nowrap}
 .vsel select{appearance:none;-webkit-appearance:none;border:0;background:transparent;padding:8px 30px 8px 8px;font-weight:500;cursor:pointer;min-width:0;max-width:100%;text-overflow:ellipsis;outline:none}
 .vsel::after{content:"";position:absolute;right:12px;top:50%;width:7px;height:7px;border-right:1.5px solid var(--ink-2);border-bottom:1.5px solid var(--ink-2);transform:translateY(-70%) rotate(45deg);pointer-events:none}
@@ -83,6 +85,9 @@ a{color:var(--brand)}
 .ph h1{font-size:30px;letter-spacing:-.012em;line-height:1.15;margin-top:2px}
 .ph p{margin:4px 0 0;color:var(--ink-3);font-size:14px}
 .ph .right{margin-left:auto}
+.data-badge{display:flex;flex-direction:column;align-items:flex-end;background:var(--brand-soft);color:var(--brand-ink);border-radius:14px;padding:8px 14px;line-height:1.25}
+.data-badge .db-l,.data-badge .db-v{font-size:11.5px;opacity:.85}
+.data-badge b{font-size:18px;font-weight:700}
 .filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:4px 0 22px;border-bottom:1px solid var(--line);margin-bottom:22px}
 .filters .lbl{font-size:12.5px;color:var(--ink-3);margin-right:4px}
 .chip{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:5px 13px;cursor:pointer;font-size:13px;color:var(--ink-2);transition:all .2s var(--ease)}
@@ -243,6 +248,8 @@ tr.zero td{color:var(--ink-3)}
 .missing .ico{width:52px;height:52px;border-radius:16px;background:var(--brand-soft);display:grid;place-items:center;margin:0 auto 14px;color:var(--brand)}
 .missing h3{font-size:17px;margin-bottom:6px}
 .missing p{color:var(--ink-2);margin:0 auto 18px;max-width:460px}
+.common-note{flex-basis:100%;margin-top:8px;padding:8px 12px;border-radius:10px;background:var(--warn-soft);color:var(--warn);font-size:12.5px}
+.common-note b{color:inherit}
 .notice{display:flex;gap:12px;align-items:center;background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;color:var(--ink-2);font-size:13px}
 #dropOverlay{position:fixed;inset:0;background:rgba(47,107,245,.08);border:2px dashed var(--brand);z-index:80;display:none;place-items:center;font-size:20px;font-weight:600;color:var(--brand-ink)}
 body.dragging #dropOverlay{display:grid}
@@ -365,11 +372,11 @@ body.dragging #dropOverlay{display:grid}
   <div class="dropzone">
     <img src="data:image/svg+xml;base64,__LOGO__" alt="">
     <h2>Sube los Excel del mes</h2>
-    <p>Arrastra aquí los archivos (Equipo Comercial y Sala T.O.) o <a href="#" id="pickLink">elígelos desde tu ordenador</a>.</p>
+    <p>Arrastra aquí los archivos (Equipo Comercial, Sala T.O., Estadística y visitas del CRM) o <a href="#" id="pickLink">elígelos desde tu ordenador</a>.</p>
     <p class="muted" style="font-size:13px">Los archivos se leen en tu navegador y no se envían a ningún servidor.</p>
     <div class="steps">
       <div><b>1 · Exporta desde Numbers</b>Archivo › Exportar a › Excel… con cada archivo.</div>
-      <div><b>2 · Súbelos aquí</b>Los dos a la vez o uno detrás de otro: se combinan.</div>
+      <div><b>2 · Súbelos aquí</b>Todos a la vez o uno detrás de otro: se combinan.</div>
       <div><b>3 · Guarda la carga</b>Queda en el desplegable de versiones para volver cuando quieras.</div>
     </div>
   </div>
@@ -419,7 +426,10 @@ const LEGACY_SRC={'Registros móviles':REG,'MKT':LEAD};
 const srcColor=k=>(SRC[k]||{}).color||'#b0b0b8';
 const TIPO_COLOR={'Nuevos':'#5b9cf6','Antiguos':'#3cc8a3'};
 const C={citas:'#5b9cf6',visitas:'#8fb8f9',demos:'#3cc8a3',ventas:'#a678f5',grid:'#f0f0f3',tick:'#86868b',ink2:'#515154'};
-const SPECIAL='Especial';
+const SPECIAL='Especial',MAIL='Mailing';
+// Equipo Mailing (teleoperadoras de venta), según Juan el 16/11. En la Estadística venden en OFERTA RECU sin hoja «-BIO» propia.
+const MAIL_PEOPLE=['ANA GALVEZ','PATROCINIO SANCHEZ','SARA ANDRADA'];
+const otherTeam=t=>t===SPECIAL||t===MAIL;
 const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 const DB_NAME='culligan-biofy-dashboard',STORE='versions';
 const IC={
@@ -433,22 +443,42 @@ const IC={
   phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',
   wrench:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
   check:'<path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/>',
+  euro:'<path d="M17.5 6.5a7 7 0 1 0 0 11M4 10h10M4 14h10"/>',
+  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  trend:'<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>',
+  box:'<path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8M12 13v8"/>',
+  link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  pin:'<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
 };
 const NAV=[
   {h:'Interpretación',items:[
     {id:'resumen',label:'Resumen',ic:'home',t:'Resumen',p:'Lo más importante del periodo, de un vistazo',e:'Interpretación'},
     {id:'analisis',label:'Análisis',ic:'bulb',t:'Análisis',p:'Dónde se gana y dónde se pierde: reparto de leads y día de la semana',e:'Interpretación'},
+    {id:'prevision',label:'Previsión',ic:'trend',t:'Previsión del mes',p:'Cómo cerrará el mes al ritmo actual y qué se espera de cada comercial',e:'Interpretación'},
+  ]},
+  {h:'Ventas',items:[
+    {id:'ventas',label:'Ventas',ic:'euro',t:'Ventas · Estadística',p:'Producidas, confirmadas, retrocesos, netas y abonadas por comercial',e:'Ventas'},
+    {id:'desglose',label:'Desglose',ic:'list',t:'Desglose de ventas',p:'Cada venta con su día, oferta, artículos, importe y estado',e:'Ventas'},
+    {id:'productos',label:'Productos y ofertas',ic:'box',t:'Productos y ofertas',p:'Qué ofertas, categorías y artículos se venden más',e:'Ventas'},
+    {id:'delegaciones',label:'Delegaciones',ic:'pin',t:'Delegaciones',p:'Córdoba, Alicante y VIP comparadas',e:'Ventas'},
+    {id:'sinergias',label:'Sinergias',ic:'link',t:'Sinergias',p:'Qué teleoperadora y qué comercial venden mejor juntos',e:'Ventas'},
   ]},
   {h:'Por origen',items:[
     {id:'origen',label:'General',ic:'layers',t:'Por origen · General',p:'Registros y leads, comparados en cada etapa',e:'Por origen'},
     {id:'registros',label:'Registros',ic:'db',src:REG,t:'Registros',p:'Registros móviles: de la base de datos a la venta',e:'Por origen'},
     {id:'leads',label:'Leads',ic:'target',src:LEAD,t:'Leads',p:'Leads de marketing: del cliente interesado a la venta',e:'Por origen'},
   ]},
-  {h:'Equipo',items:[
-    {id:'comerciales',label:'Comerciales',ic:'users',t:'Comerciales',p:'Equipos y ranking individual',e:'Datos'},
-    {id:'vip',label:'VIP',ic:'star',t:'VIP',p:'Equipo especial: VIP, VIP Biofy y leads',e:'Datos'},
-    {id:'teleoperadoras',label:'Teleoperadoras',ic:'phone',t:'Teleoperadoras',p:'Sala T.O.: concertación de citas',e:'Datos'},
-    {id:'tecnicos',label:'Técnicos',ic:'wrench',t:'Consultores técnicos',p:'Visitas de mantenimiento y venta',e:'Datos'},
+  {h:'Equipos',items:[
+    {id:'comerciales',label:'Comerciales',ic:'users',t:'Equipo comercial',p:'Córdoba y Alicante: equipos y ranking individual',e:'Equipos'},
+    {id:'visitas',label:'Visitas CRM',ic:'pin',t:'Visitas · CRM',p:'Visitas agendadas en el CRM y cuántas siguen sin resultado',e:'Equipos'},
+    {id:'vip',label:'VIP',ic:'star',t:'VIP',p:'Equipo especial: VIP, VIP Biofy y leads',e:'Equipos'},
+    {id:'mailing',label:'Mailing',ic:'mail',t:'Mailing',p:'Teleoperadoras de venta: Ana Gálvez, Patrocinio Sánchez y Sara Andrada',e:'Equipos'},
+    {id:'teleoperadoras',label:'Teleoperadoras',ic:'phone',t:'Teleoperadoras',p:'Sala T.O.: concertación de citas',e:'Equipos'},
+    {id:'tecnicos',label:'Técnicos',ic:'wrench',t:'Consultores técnicos',p:'Visitas de mantenimiento y venta',e:'Equipos'},
+  ]},
+  {h:'Administración',items:[
+    {id:'comisiones',label:'Comisiones',ic:'euro',admin:1,t:'Comisiones',p:'Solo para administradores',e:'Administración'},
   ]},
   {h:'Revisión',items:[
     {id:'calidad',label:'Calidad de datos',ic:'check',t:'Calidad de datos',p:'Cosas a revisar en los archivos',e:'Revisión'},
@@ -575,14 +605,429 @@ function parseWorkbook(wb){
   return out;
 }
 
+/* ============================== ESTADÍSTICA (GLOBAL) Y VISITAS DEL CRM ============================== */
+// De estos dos archivos solo se guardan cifras por comercial y día. Ni nombres de clientes, ni DNI, ni comentarios.
+const MES_IDX=Object.fromEntries(MESES.map((m,i)=>[norm(m),i+1]));
+function mesDe(txt){for(const w of norm(txt).split(/[^A-Z]+/))if(MES_IDX[w])return MES_IDX[w];return null;}
+function mapOrigen(o){const n=norm(o);if(!n)return '';if(n.startsWith('MOVIL')||n.includes('REGISTRO'))return REG;if(n.startsWith('MKT')||n.includes('MARKETING'))return LEAD;if(n.includes('BIOFY'))return 'VIP Biofy';if(n.startsWith('VIP'))return 'VIP';return titleCase(n.toLowerCase());}
+const isGlobal=wb=>wb.SheetNames.some(s=>/-BIO$/i.test(s))&&wb.SheetNames.includes('OFERTA RECU');
+// Reglas del GLOBAL (las del Informe Comercial): hojas «-BIO» + OFERTA RECU; nunca «BIO C» ni «EN BLANCO-BIO».
+// Retroceso = −1 aunque esté escrito +1. Los retrocesos no llevan día: se cuentan en cualquier periodo.
+function parseGlobal(wb,fname){
+  const out={recs:[],warnings:[],month:mesDe(fname)};
+  const rowsOf=s=>XLSX.utils.sheet_to_json(wb.Sheets[s],{header:1,raw:true,defval:null,blankrows:true});
+  const seen=new Map(),add=(k,w)=>{if(!seen.has(k))seen.set(k,[]);seen.get(k).push(w);};
+  // Cada venta: cuenta 1 en su hoja «-BIO» y 0,5 en OFERTA RECU (decidido por Juan el 13/11, igual que la pizarra)
+  const OF=['Ultra','Plus','Bio','Minibio'];
+  const push=(person,row,ci,hoja)=>{
+    const cn=norm(row[ci.cn]),pago=norm(row[ci.pago]),retro=cn==='RETROCESO',prod=num(row[ci.prod]),day=num(row[ci.B]);
+    if(!retro&&!(prod>0)&&!cn)return;
+    const w=hoja==='OFERTA RECU'?.5:1,txt=i=>i==null?'':String(row[i]??'').trim();
+    out.recs.push({person,day:!retro&&day>=1&&day<=31?Math.round(day):null,prod:!retro&&prod>0?1:0,w,
+      est:cn==='CONFIRMADO'?'conf':cn==='NULO'?'nul':retro?'retro':cn==='NO APTO'?'noapto':/^CERR/.test(cn)?'cerr':'',m:retro?-1:(num(row[ci.conf])||0),abon:pago==='ABONADO'?1:0,src:mapOrigen(row[ci.orig]),hoja,
+      of:hoja==='OFERTA RECU'?'RECU':(ci.of?OF[ci.of.findIndex(i=>num(row[i])>0)]||'':''),cat:titleCase(txt(ci.cat).toLowerCase()),
+      arts:ci.arts.map(txt).filter(Boolean),imp:num(row[ci.imp])||0,to:ci.to!=null?titleCase(norm(row[ci.to]).replace(/\s+L(AS)?$/,'').toLowerCase()):'',fin:ci.fin!=null?txt(ci.fin).toUpperCase():''});
+  };
+  const posB={B:1,prod:2,conf:12,cn:14,pago:15,orig:21,of:[8,9,10,11],cat:16,arts:[17,18,19,20],imp:22,fin:27,to:30},
+        posR={B:1,prod:9,conf:10,cn:12,pago:13,orig:19,cat:14,arts:[15,16,17,18],imp:20};
+  const names=[];
+  for(const sh of wb.SheetNames.filter(s=>/-BIO$/i.test(s)&&!/^EN BLANCO/i.test(s))){
+    const rows=rowsOf(sh),nombre=norm(rows[0]&&rows[0][2]);if(!nombre||nombre==='COMERCIAL NO EXISTE')continue;
+    if(!out.month)out.month=mesDe(rows[0][7]);
+    if(!names.includes(nombre))names.push(nombre);
+    for(const[a,b]of[[4,28],[44,68]])for(let r=a;r<=b;r++){
+      const row=rows[r-1];if(!row||(row[2]==null&&row[14]==null))continue;
+      push(nombre,row,posB,sh);
+      const cn=norm(row[14]),dni=norm(row[4]);
+      if(cn==='RETROCESO'&&num(row[12])>0)out.warnings.push({lvl:'warn',kind:'ven',msg:`Estadística, hoja «${esc(sh)}» fila ${r}: retroceso escrito con +1. Se cuenta como −1.`});
+      if(dni){add([dni,row[1],row[22],cn].join('|'),`«${sh}» fila ${r}`);if(cn==='RETROCESO')add('R|'+dni,`«${sh}» fila ${r}`);}
+    }
+  }
+  const otros={};
+  if(wb.Sheets['OFERTA RECU']){const rows=rowsOf('OFERTA RECU');
+    for(const[a,b]of[[4,38],[49,83]])for(let r=a;r<=b;r++){
+      const row=rows[r-1];if(!row)continue;const q=norm(row[8]);if(!q||q==='-'||q==='TOTAL')continue;
+      const nombre=names.find(n=>n===q||n.startsWith(q)||q.startsWith(n));
+      const tq=toks(q),mail=!nombre&&MAIL_PEOPLE.find(n=>{const tn=toks(n);return tn[0]===tq[0]&&tq[1]&&tq[1].length>=4&&tn[1].startsWith(tq[1]);});
+      if(!nombre&&!mail){otros[q]=(otros[q]||0)+1;continue;}
+      push(nombre||mail,row,posR,'OFERTA RECU');if(mail)out.recs[out.recs.length-1].th=MAIL;
+      const dni=norm(row[4]);if(dni&&norm(row[12])==='RETROCESO')add('R|'+dni,`«OFERTA RECU» fila ${r}`);
+    }
+  }
+  for(const[k,w]of seen){
+    if(w.length<2)continue;
+    if(k.startsWith('R|')){if(w.some(x=>x.includes('OFERTA RECU'))&&w.some(x=>!x.includes('OFERTA RECU')))out.warnings.push({lvl:'warn',kind:'ven',msg:`Estadística: el mismo retroceso está en la hoja del comercial y en OFERTA RECU (${w.join(' y ')}). Se cuentan los dos: confírmalo con administración.`});}
+    else out.warnings.push({lvl:'warn',kind:'ven',msg:`Estadística: posible venta repetida, con el mismo cliente, día, importe y estado (${w.join(' y ')}). Se cuentan las dos: confírmalo con administración.`});
+  }
+  const ot=Object.entries(otros);
+  if(ot.length)out.warnings.push({lvl:'info',kind:'ven',msg:`OFERTA RECU tiene ventas de personas sin hoja «-BIO» propia, que no se cuentan aquí: ${ot.map(([n,c])=>esc(titleCase(n.toLowerCase()))+' ('+c+')').join(', ')}.`});
+  return out;
+}
+const isVisitas=t=>/<table/i.test(t.slice(0,3000))&&/FECHA HORA/i.test(t.slice(0,3000))&&/USUARIO/i.test(t.slice(0,3000));
+// Excel de visitas del SMI CRM (por dentro es una tabla web). Se queda con fecha, comercial y estado; lo demás se descarta.
+function parseVisitas(txt){
+  const cells=tr=>[...tr.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map(m=>m[1].replace(/<[^>]+>/g,'').trim());
+  const trs=[...txt.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)].map(m=>m[1]);
+  const head=cells(trs[0]||'').map(norm),iF=head.indexOf('FECHA HORA'),iU=head.indexOf('USUARIO'),iE=head.indexOf('ESTADO');
+  const agg=new Map();
+  if(iF<0||iU<0||iE<0)return [];
+  for(const tr of trs.slice(1)){
+    const c=cells(tr),date=toISODate((c[iF]||'').split(/\s+/)[0]),user=norm(c[iU]);if(!date||!user)continue;
+    const k=date+'|'+user;let o=agg.get(k);if(!o)agg.set(k,o={date,person:user,n:0,nulo:0,demo:0,venta:0,sinres:0});
+    const e=norm(c[iE]);o.n++;
+    if(e==='NULO')o.nulo++;else if(e==='VENTA'){o.demo++;o.venta++;}else if(e==='NO VENTA')o.demo++;else o.sinres++;
+  }
+  return [...agg.values()];
+}
+// Une los nombres del CRM y de la Estadística con los del cuadro de comerciales
+// («COORD. ALMUDENA MOLINA ZAMORA» → Almudena Molina, «EVA MARIA MARTINEZ CARPETANO» → Eva M. Martinez).
+const toks=s=>norm(s).replace(/\./g,'. ').split(/\s+/).map(t=>t.replace(/\.$/,'')).filter(Boolean);
+const PREFIJO=/^(COORD|COMERC|COM|JEFA|JEFE)\.?\s+/;
+let _pc={sig:null,m:new Map()};
+function personOf(raw){
+  const sig=JSON.stringify(state.roster.com);if(_pc.sig!==sig)_pc={sig,m:new Map()};
+  if(_pc.m.has(raw))return _pc.m.get(raw);
+  const t=toks(norm(raw).replace(PREFIJO,''));let best=null,bs=0,amb=false;
+  for(const p of rosterNames('com')){
+    const rt=toks(p.name);if(!rt.length||rt[0]!==t[0])continue;
+    if(!rt.every(x=>t.some(y=>y===x||(x.length===1&&y.startsWith(x))||(y.length===1&&x.startsWith(y)))))continue;
+    if(rt.length>bs){best=p;bs=rt.length;amb=false;}else if(rt.length===bs&&best&&best.name!==p.name)amb=true;
+  }
+  const r=best&&!amb?{name:best.name,team:best.team,ok:1}:{name:titleCase(norm(raw).replace(PREFIJO,'').toLowerCase()),team:'',ok:0};
+  _pc.m.set(raw,r);return r;
+}
+const withPerson=rs=>rs.map(r=>{const p=personOf(r.person);return p.ok||!r.th?{...r,name:p.name,team:p.team,ok:p.ok}:{...r,name:p.name,team:r.th,ok:1};});
+// Estados de la Estadística: CONFIRMADO, NULO, RETROCESO, NO APTO, CERR. COMERCIAL (pendiente de gestión) y vacío/PENDIENTE (por confirmar)
+function aggVen(rs){const o={prod:0,conf:0,confPrev:0,nul:0,nulPrev:0,noapto:0,cerr:0,retro:0,pend:0,neta:0,abon:0};for(const r of rs){const w=r.w??1;o.prod+=r.prod*w;if(r.est==='conf'){if(r.prod)o.conf+=w;else o.confPrev+=w;o.neta+=r.m*w;}else if(r.est==='nul'){if(r.prod)o.nul+=w;else o.nulPrev+=w;}else if(r.est==='retro'){o.retro+=w;o.neta+=r.m*w;}else if(r.est==='noapto'){if(r.prod)o.noapto+=w;}else if(r.est==='cerr'){if(r.prod)o.cerr+=w;}else if(r.prod)o.pend+=w;if(r.abon)o.abon+=r.m*w;}return o;}
+const aggVis=rs=>({n:sum(rs,'n'),nulo:sum(rs,'nulo'),demo:sum(rs,'demo'),venta:sum(rs,'venta'),sinres:sum(rs,'sinres')});
+const hasVen=()=>state.data.ven.length>0||!!state.files.ven;
+const hasVis=()=>state.data.vis.length>0||!!state.files.vis;
+function yearFor(month){
+  for(const k of['com','to','vis'])for(const r of state.data[k]){const[y,m]=r.date.split('-').map(Number);if(m===month)return y;}
+  const now=new Date();return month>now.getMonth()+1?now.getFullYear()-1:now.getFullYear();
+}
+// Último día con datos de cada archivo (para avisar cuando no llegan al mismo día)
+function lastDays(){
+  const L=[];const last=a=>a.reduce((m,r)=>r.date&&r.date>m?r.date:m,'');
+  const lc=last(state.data.com.filter(r=>r.nulos||r.demos||r.ventas)),lt=last(state.data.to.filter(r=>r.ced||r.producidas||r.nulos)),lv=last(state.data.ven),li=last(state.data.vis);
+  if(lc)L.push({k:'com',l:'Equipo Comercial',d:lc});if(lt)L.push({k:'to',l:'Sala T.O.',d:lt});if(lv)L.push({k:'ven',l:'Estadística',d:lv});if(li)L.push({k:'vis',l:'Visitas del CRM',d:li});
+  return L;
+}
+function missingVen(){return `<div class="card missing"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M12 17v-6M9 14l3-3 3 3"/></svg></div><h3>No se ha cargado la Estadística</h3><p>Sube el Excel de la Estadística del mes (el «GLOBAL», .xlsm). Solo se guardan las cifras por comercial: nunca clientes ni DNI.</p><button class="btn primary" data-up="1">Subir Excel</button></div>`;}
+function missingVis(){return `<div class="card missing"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M12 17v-6M9 14l3-3 3 3"/></svg></div><h3>No se han cargado las visitas del CRM</h3><p>Exporta las visitas del mes desde el SMI CRM (filtradas por <b>fecha de la visita</b>) y súbelas tal cual. Solo se cuentan visitas por comercial y día: los nombres de clientes y los comentarios no se guardan.</p><button class="btn primary" data-up="1">Subir Excel</button></div>`;}
+function teamSelect(teams){return `<label class="vsel" style="max-width:none"><span class="lb">Equipo</span><select id="teamSel"><option value="all">Todos</option>${teams.map(t=>`<option value="${esc(t)}" ${state.team===t?'selected':''}>${esc(t===SPECIAL?'VIP':t)}</option>`).join('')}</select></label>`;}
+const teamTag=t=>t?`<span class="tag">${esc(t===SPECIAL?'VIP':t)}</span>`:'<span class="muted">—</span>';
+
+/* ============================== TAB: VENTAS (ESTADÍSTICA) ============================== */
+function tabVentas(F){
+  if(!hasVen()){$('#tab').innerHTML=missingVen();return;}
+  const all=withPerson(F.ven);
+  const teams=[...new Set(all.map(r=>r.team).filter(Boolean))].sort((a,b)=>(a===SPECIAL)-(b===SPECIAL)||a.localeCompare(b));
+  if(state.team!=='all'&&!teams.includes(state.team))state.team='all';
+  const recs=all.filter(r=>state.team==='all'||r.team===state.team);
+  const a=aggVen(recs);
+  const people=[...groupBy(recs,r=>r.name).entries()].map(([n,rs])=>{const x=aggVen(rs);return{name:n,team:rs[0].team,...x,pNeta:pct(x.neta,x.prod),_out:!rs[0].ok};});
+  const retroSinDia=recs.filter(r=>r.est==='retro').length;
+  let h=`<div class="sec-title"><h2>${state.team==='all'?'Todos':state.team===SPECIAL?'VIP':'Equipo '+esc(state.team)}</h2><p>Según la Estadística (${esc(state.files.ven||'')})</p><div class="right">${teamSelect(teams)}</div></div>`;
+  h+=kpiTiles([
+    {l:'Ventas netas',v:fmt(a.neta),s:`confirmadas menos retrocesos · ${fmtP(pct(a.neta,a.prod))} de lo producido`,hl:1},
+    {l:'Producidas',v:fmt(a.prod),s:'ventas firmadas en el periodo'},
+    {l:'Confirmadas',v:fmt(a.conf),s:`${fmt(a.nul)} nulas · ${fmt(a.noapto)} no aptas · ${fmt(a.cerr)} pendientes de gestión · ${fmt(a.pend)} por confirmar`},
+    {l:'Retrocesos',v:fmt(a.retro),s:'cada uno resta 1 a la neta'},
+    {l:'Abonadas',v:fmt(a.abon),s:'ya pagadas por la financiera'},
+  ]);
+  h+=`<div class="notice mt"><div>Los <b>retrocesos</b> no llevan día en la Estadística, así que se cuentan siempre, aunque elijas un periodo más corto${retroSinDia?` (${fmt(retroSinDia)} en esta vista)`:''}. Las ventas de <b>OFERTA RECU</b> cuentan <b>0,5</b> para el comercial que las hizo, como en la pizarra.${a.confPrev||a.nulPrev?` Ventas de meses anteriores resueltas este mes: ${fmt(a.confPrev)} confirmadas (suman a la neta) y ${fmt(a.nulPrev)} anuladas (no cuentan como nulas del periodo).`:''}</div></div>`;
+  const srcs=[...new Set(recs.filter(r=>r.prod&&r.src).map(r=>r.src))];
+  h+=`<div class="sec">${secTitle('Por comercial','Neta = confirmadas − retrocesos','dat')}
+    <div class="grid g2"><div class="card"><h3>Ventas netas por comercial</h3><p class="sub">Ordenado de más a menos</p><div class="chart-box" id="bxNet"><canvas id="chNet"></canvas></div></div>
+    <div class="card"><h3>Producidas por origen</h3><p class="sub">De dónde venía el cliente</p>${hbarsHTML(srcs.map(s=>({name:s,v:recs.filter(r=>r.prod&&r.src===s).length,color:srcColor(s)})).sort((x,y)=>y.v-x.v))}</div></div>
+    <div class="card mt"><h3>Tabla de ventas</h3><p class="sub">En gris: personas que no están en el cuadro de comerciales</p><div class="tbl-wrap"><table id="tVen"></table></div></div></div>`;
+  $('#tab').innerHTML=h;
+  $('#teamSel').onchange=e=>{state.team=e.target.value;renderTab();};
+  const ord=[...people].sort((x,y)=>y.neta-x.neta||y.prod-x.prod);setH('bxNet',ord.length);
+  mkChart('chNet',{type:'bar',data:{labels:ord.map(p=>p.name),datasets:[{label:'Netas',data:ord.map(p=>p.neta),backgroundColor:ord.map(p=>p.neta<0?'#f2a7a7':'#2968fe'),borderRadius:5,borderSkipped:false,barPercentage:.72,categoryPercentage:.86}]},options:hOpts(false)});
+  renderTable('tVen',[
+    {key:'name',label:'Comercial',l:1},{key:'team',label:'Equipo',l:1,html:r=>teamTag(r.team)},
+    {key:'prod',label:'Producidas',fmt},{key:'conf',label:'Confirmadas',fmt},{key:'nul',label:'Nulas',fmt},{key:'noapto',label:'No aptas',fmt},{key:'cerr',label:'Pend. gestión',fmt},{key:'pend',label:'Por confirmar',fmt},
+    {key:'retro',label:'Retrocesos',fmt},{key:'neta',label:'Netas',fmt:v=>`<b>${fmt(v)}</b>`},{key:'abon',label:'Abonadas',fmt},{key:'pNeta',label:'% neta',fmt:fmtP},
+  ],people.map(p=>({...p,_zero:p._out})),{sort:['neta',-1],total:{name:'Total',team:'',...a,pNeta:pct(a.neta,a.prod)}});
+}
+
+/* ============================== VENTAS: DESGLOSE, PRODUCTOS, DELEGACIONES, SINERGIAS Y PREVISIÓN ============================== */
+// Delegación = equipo del cuadro de comerciales. El equipo de Almudena es la delegación de Alicante.
+const DELEG={'Almudena':'Alicante'};
+const delegName=t=>!t?'Sin equipo':t===SPECIAL?'VIP':DELEG[t]||t;
+const isAdminOnly=id=>!!(PAGES[id]&&PAGES[id].admin);
+const delegTag=d=>d&&d!=='Sin equipo'?`<span class="tag">${esc(d)}</span>`:'<span class="muted">—</span>';
+const eurF=new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+const fmtE=v=>v==null||!isFinite(v)?'—':eurF.format(v);
+const EST_LBL={conf:'Confirmada',nul:'Nula',retro:'Retroceso',noapto:'No apta',cerr:'Pend. gestión','':'Por confirmar'};
+const OF_ORD=['Ultra','Plus','Bio','Minibio','RECU','Sin oferta'];
+// Teleoperadoras: la Estadística y la Sala T.O. escriben algunos nombres distinto («Montse» / «Monserrat», «Patrocinio» / «Patrocinio Sánchez Lastra»)
+const TO_ALIAS={MONTSE:'MONSERRAT'};
+const toKey=n=>{const t=toks(n||'')[0]||'';return TO_ALIAS[t]||t;};
+function venBase(F){return withPerson(F.ven).map(r=>({...r,deleg:delegName(r.team),ofl:r.of||'Sin oferta',estl:EST_LBL[r.est]??r.est,cat:r.cat||'Sin categoría',src:r.src||'Sin origen'}));}
+// Filtros de las pestañas de ventas (se recuerdan al cambiar de pestaña)
+const VF_KEY={team:'deleg',seller:'name',of:'ofl',est:'estl',src:'src',cat:'cat'};
+const VF_LBL={team:'Delegación',seller:'Comercial',of:'Oferta',est:'Estado',src:'Origen',cat:'Categoría'};
+function applyVF(rs,keys,except){return rs.filter(r=>keys.every(k=>k===except||state.vf[k]==='all'||String(r[VF_KEY[k]])===state.vf[k]));}
+function filterBar(all,keys){
+  return `<div class="fbar">${keys.map(k=>{
+    const pool=applyVF(all,keys.filter(x=>x!==k&&(k==='seller'?x==='team':false)));
+    let vals=[...new Set((k==='seller'?pool:all).map(r=>String(r[VF_KEY[k]])))];
+    vals=k==='of'?OF_ORD.filter(x=>vals.includes(x)):vals.sort((a,b)=>a.localeCompare(b,'es'));
+    if(state.vf[k]!=='all'&&!vals.includes(state.vf[k]))state.vf[k]='all';
+    return `<label class="vsel"><span class="lb">${VF_LBL[k]}</span><select data-vf="${k}"><option value="all">Todos</option>${vals.map(v=>`<option value="${esc(v)}" ${state.vf[k]===v?'selected':''}>${esc(v)}</option>`).join('')}</select></label>`;
+  }).join('')}${keys.some(k=>state.vf[k]!=='all')?'<button class="btn" data-vfreset="1">Quitar filtros</button>':''}</div>`;
+}
+function bindVF(){
+  document.querySelectorAll('[data-vf]').forEach(s=>s.onchange=()=>{state.vf[s.dataset.vf]=s.value;if(s.dataset.vf==='team')state.vf.seller='all';renderTab();});
+  const b=document.querySelector('[data-vfreset]');if(b)b.onclick=()=>{for(const k in state.vf)state.vf[k]='all';renderTab();};
+}
+const filtTxt=keys=>{const f=keys.filter(k=>state.vf[k]!=='all').map(k=>`${VF_LBL[k].toLowerCase()}: ${esc(state.vf[k])}`);return f.length?f.join(' · '):'todas las ventas';};
+// Una fila por grupo: producidas, confirmadas, % confirmación, netas e importe confirmado
+function groupRows(rs,keyFn){
+  const m=new Map();for(const r of rs)for(const k of[].concat(keyFn(r))){if(!m.has(k))m.set(k,[]);m.get(k).push(r);}
+  return [...m.entries()].map(([k,g])=>{const a=aggVen(g),c=g.filter(r=>r.est==='conf');const imp=sum(c,'imp');return{k,...a,pConf:pct(a.conf,a.prod),imp,ticket:c.length?imp/c.length:null};});
+}
+const GCOLS=lab=>[{key:'k',label:lab,l:1},{key:'prod',label:'Producidas',fmt:v=>`<b>${fmt(v)}</b>`},{key:'conf',label:'Confirmadas',fmt},{key:'pConf',label:'% confirmación',fmt:fmtP},{key:'neta',label:'Netas',fmt},{key:'imp',label:'Importe confirmado',fmt:fmtE},{key:'ticket',label:'Importe medio',fmt:fmtE}];
+const topOf=rows=>[...rows].filter(r=>!/^Sin /.test(r.k)).sort((a,b)=>b.prod-a.prod)[0];
+
+/* ---------- Desglose de ventas: una fila por venta (sin clientes) ---------- */
+function tabDesglose(F){
+  if(!hasVen()){$('#tab').innerHTML=missingVen();return;}
+  const K=['team','seller','of','est','src','cat'];
+  const all=venBase(F),bar=filterBar(all,K),rs=applyVF(all,K);
+  const a=aggVen(rs),prod=rs.filter(r=>r.prod),conf=rs.filter(r=>r.est==='conf');
+  const impP=sum(prod,'imp'),impC=sum(conf,'imp');
+  let h=`<div class="sec-title"><h2>Desglose de ventas</h2><p>Cada venta de las hojas «-BIO» y de OFERTA RECU de la Estadística (${esc(state.files.ven||'')}). Sin datos de clientes.</p></div>${bar}`;
+  h+=kpiTiles([
+    {l:'Ventas producidas',v:fmt(a.prod),s:`${fmtE(impP)} en total`,hl:1},
+    {l:'Confirmadas',v:fmt(a.conf+a.confPrev),s:`${fmtE(impC)} de importe`},
+    {l:'Importe medio',v:fmtE(conf.length?impC/conf.length:null),s:'por venta confirmada'},
+    {l:'Ventas netas',v:fmt(a.neta),s:'confirmadas menos retrocesos'},
+  ]);
+  h+=`<div class="sec">${secTitle('Ventas por día','Producidas cada día, según el día de producción de la Estadística','dat')}<div class="card"><h3>Producidas por día</h3><p class="sub">${filtTxt(K)}</p><div class="chart-box" style="height:240px"><canvas id="chDia"></canvas></div></div></div>`;
+  h+=`<div class="sec">${secTitle('Todas las ventas','Pulsa en una columna para ordenar. Las de OFERTA RECU cuentan 0,5. Los retrocesos no llevan día.','dat')}<div class="card"><div class="tbl-wrap"><table id="tDes"></table></div></div></div>`;
+  $('#tab').innerHTML=h;bindVF();
+  const days=[...new Set(prod.map(r=>r.date).filter(Boolean))].sort();
+  const by=d=>est=>sum(prod.filter(r=>r.date===d&&(est?r.est==='conf':r.est!=='conf')),r=>r.w??1);
+  mkChart('chDia',{type:'bar',data:{labels:days.map(dLabel),datasets:[{...barDs('Confirmadas',days.map(d=>by(d)(1)),'#2968fe')},{...barDs('Resto (nulas, pendientes…)',days.map(d=>by(d)(0)),'#c9d8ff')}]},options:(()=>{const o=baseOpts();o.scales.x.stacked=true;o.scales.y.stacked=true;o.plugins.legend={display:true,position:'bottom',labels:{boxWidth:10,usePointStyle:true}};return o;})()});
+  renderTable('tDes',[
+    {key:'date',label:'Día',l:1,html:r=>r.date?dLabel(r.date):r._tot?'<b>Total</b>':'<span class="muted">sin día</span>'},
+    {key:'name',label:'Comercial',l:1},{key:'deleg',label:'Delegación',l:1,html:r=>r._tot?'':delegTag(r.deleg)},
+    {key:'ofl',label:'Oferta',l:1},{key:'cat',label:'Categoría',l:1},{key:'artsT',label:'Artículos',l:1},{key:'src',label:'Origen',l:1},
+    {key:'to',label:'Concertadora',l:1},{key:'fin',label:'Financiera',l:1},{key:'estl',label:'Estado',l:1},{key:'pago',label:'Pago',l:1},
+    {key:'imp',label:'Importe',fmt:fmtE},{key:'w',label:'Cuenta',fmt},
+  ],rs.map(r=>({...r,artsT:r.arts.join(' + ')||'—',to:r.to||'—',fin:r.fin||'—',pago:r.abon?'Abonada':'—',w:r.w??1})),{sort:['date',-1],total:{_tot:1,name:'',deleg:'',ofl:'',cat:'',artsT:'',src:'',to:'',fin:'',estl:'',pago:'',imp:sum(rs,'imp'),w:sum(rs,r=>r.w??1)}});
+}
+
+/* ---------- Productos y ofertas ---------- */
+function tabProductos(F){
+  if(!hasVen()){$('#tab').innerHTML=missingVen();return;}
+  const K=['team','seller','src'];
+  const all=venBase(F),bar=filterBar(all,K),rs=applyVF(all,K).filter(r=>r.est!=='retro');
+  const ofR=groupRows(rs,r=>r.ofl).sort((a,b)=>OF_ORD.indexOf(a.k)-OF_ORD.indexOf(b.k));
+  const catR=groupRows(rs,r=>r.cat).sort((a,b)=>b.prod-a.prod);
+  const artR=groupRows(rs,r=>r.arts.length?r.arts.map(x=>titleCase(x.toLowerCase())):['Sin artículo']).sort((a,b)=>b.prod-a.prod);
+  const t1=topOf(ofR),t2=topOf(catR),t3=topOf(artR);
+  let h=`<div class="sec-title"><h2>Productos y ofertas</h2><p>Qué se vende más, según la Estadística · ${filtTxt(K)}</p></div>${bar}`;
+  h+=kpiTiles([
+    {l:'Oferta más vendida',v:t1?esc(t1.k):'—',s:t1?`${fmt(t1.prod)} producidas · ${fmt(t1.conf)} confirmadas`:'',hl:1},
+    {l:'Categoría más vendida',v:t2?esc(t2.k):'—',s:t2?`${fmt(t2.prod)} producidas`:''},
+    {l:'Artículo más vendido',v:t3?esc(t3.k):'—',s:t3?`va en ${fmt(t3.prod)} ventas`:''},
+    {l:'Importe medio',v:fmtE((()=>{const c=rs.filter(r=>r.est==='conf');return c.length?sum(c,'imp')/c.length:null;})()),s:'por venta confirmada'},
+  ]);
+  h+=`<div class="notice mt"><div>La <b>oferta</b> sale de las columnas «Confirmado Ultra / Plus / Bio / Minibio» de cada venta. Una venta puede llevar <b>varios artículos</b> (por ejemplo Voqua + Prolime), así que en la tabla de artículos una venta cuenta en cada uno de ellos.</div></div>`;
+  h+=`<div class="sec">${secTitle('Ofertas','','dat')}<div class="grid g2"><div class="card"><h3>Producidas por oferta</h3><p class="sub">Ventas firmadas en el periodo</p>${hbarsHTML(ofR.map(r=>({name:r.k,v:r.prod,color:'#2968fe',dim:r.k==='Sin oferta'})))}</div>
+    <div class="card"><h3>Detalle por oferta</h3><p class="sub">Importe medio = importe confirmado ÷ ventas confirmadas</p><div class="tbl-wrap"><table id="tOf"></table></div></div></div></div>`;
+  h+=`<div class="sec">${secTitle('Categorías y artículos','','dat')}<div class="grid g2"><div class="card"><h3>Por categoría</h3><p class="sub">Ósmosis, fuentes, multiproducto…</p><div class="tbl-wrap"><table id="tCat"></table></div></div>
+    <div class="card"><h3>Por artículo</h3><p class="sub">Una venta con dos artículos cuenta en los dos</p><div class="tbl-wrap"><table id="tArt"></table></div></div></div></div>`;
+  const people=[...groupBy(rs,r=>r.name).entries()].map(([n,g])=>{const o={name:n,deleg:g[0].deleg,tot:sum(g,r=>r.prod*(r.w??1))};for(const x of OF_ORD)o['o_'+x]=sum(g.filter(r=>r.ofl===x),r=>r.prod*(r.w??1));return o;});
+  const ofs=OF_ORD.filter(x=>people.some(p=>p['o_'+x]));
+  h+=`<div class="sec">${secTitle('Oferta por comercial','Ventas producidas de cada oferta','dat')}<div class="card"><div class="tbl-wrap"><table id="tOfCom"></table></div></div></div>`;
+  $('#tab').innerHTML=h;bindVF();
+  renderTable('tOf',GCOLS('Oferta'),ofR,{sort:['prod',-1]});
+  renderTable('tCat',GCOLS('Categoría'),catR,{sort:['prod',-1]});
+  renderTable('tArt',GCOLS('Artículo').filter(c=>c.key!=='ticket'),artR,{sort:['prod',-1]});
+  renderTable('tOfCom',[{key:'name',label:'Comercial',l:1},{key:'deleg',label:'Delegación',l:1,html:r=>r._tot?'':delegTag(r.deleg)},...ofs.map(x=>({key:'o_'+x,label:x,fmt})),{key:'tot',label:'Total',fmt:v=>`<b>${fmt(v)}</b>`}],
+    people,{sort:['tot',-1],total:{_tot:1,name:'Total',deleg:'',tot:sum(people,'tot'),...Object.fromEntries(ofs.map(x=>['o_'+x,sum(people,'o_'+x)]))}});
+}
+
+/* ---------- Delegaciones ---------- */
+function tabDelegaciones(F){
+  if(!hasCom()&&!hasVen()){$('#tab').innerHTML=missingFile('com');return;}
+  const ven=hasVen()?venBase(F):[],vis=hasVis()?withPerson(F.vis):[];
+  const names=[...new Set([...F.com.map(r=>delegName(r.team)),...ven.map(r=>r.deleg)])].filter(d=>d!=='Sin equipo').sort((a,b)=>(a==='VIP')-(b==='VIP')||a.localeCompare(b,'es'));
+  const rows=names.map(d=>{
+    const com=F.com.filter(r=>delegName(r.team)===d),v=ven.filter(r=>r.deleg===d),c=aggCom(com),a=aggVen(v);
+    let ppl=new Set(com.filter(r=>r.nulos||r.demos||r.ventas).map(r=>r.person));if(!ppl.size)ppl=new Set(v.filter(r=>r.prod).map(r=>r.name));
+    const imp=sum(v.filter(r=>r.est==='conf'),'imp');
+    return{k:d,n:ppl.size,...c,pNulas:pct(c.nulos,c.visitas),pCierre:pct(c.ventas,c.demos),prod:a.prod,neta:a.neta,abon:a.abon,imp,
+      netaCom:ppl.size&&hasVen()?a.neta/ppl.size:null,crm:hasVis()?aggVis(vis.filter(r=>delegName(r.team)===d)).n:null};
+  });
+  if(F.tec.length){const t=aggTec(F.tec);rows.push({k:'Consultores técnicos',n:new Set(F.tec.map(r=>r.person)).size,visitas:t.nulos+t.demos,nulos:t.nulos,demos:t.demos,ventas:t.ventas,pNulas:pct(t.nulos,t.nulos+t.demos),pCierre:pct(t.ventas,t.demos),prod:null,neta:null,abon:null,imp:null,netaCom:null,crm:null,_tec:1});}
+  const sinEq=ven.filter(r=>r.deleg==='Sin equipo'),se=aggVen(sinEq);
+  const best=[...rows].filter(r=>r.pCierre!=null&&r.demos>=10).sort((a,b)=>b.pCierre-a.pCierre)[0];
+  let h=`<div class="sec-title"><h2>Rendimiento por delegación</h2><p>Cada delegación es un equipo del cuadro de comerciales (Alicante = equipo Almudena). Visitas y demos del cuadro; ventas netas e importe de la Estadística.</p></div>`;
+  h+=`<div class="grid kpis">${rows.filter(r=>!r._tec).map(r=>`<div class="card kpi ${best&&best.k===r.k?'hl':''}"><div class="k-l">${esc(r.k)}</div><div class="k-v">${fmt(hasVen()?r.neta:r.ventas)}</div><div class="k-s">${hasVen()?'ventas netas':'ventas (cuadro)'} · ${fmt(r.n)} comerciales · ${fmtP(r.pCierre)} de cierre</div></div>`).join('')}</div>`;
+  if(best)h+=`<div class="notice mt"><div>La delegación que mejor cierra es <b>${esc(best.k)}</b>: vende en el <b>${fmtP(best.pCierre)}</b> de sus demos.${sinEq.length?` Hay ${fmt(se.prod)} ventas producidas de personas que no están en el cuadro (por ejemplo coordinadores); no se suman a ninguna delegación.`:''}</div></div>`;
+  h+=`<div class="sec">${secTitle('Comparación','','dat')}<div class="grid g2">
+    <div class="card"><h3>${hasVen()?'Ventas netas':'Ventas'} por delegación</h3><p class="sub">Total del periodo</p>${hbarsHTML(rows.filter(r=>!r._tec).map(r=>({name:r.k,v:hasVen()?r.neta:r.ventas,color:'#2968fe'})))}</div>
+    <div class="card"><h3>${hasVen()?'Ventas netas':'Ventas'} por comercial</h3><p class="sub">Media de cada delegación: total ÷ comerciales con actividad</p>${hbarsHTML(rows.filter(r=>!r._tec&&r.n).map(r=>({name:r.k,v:(hasVen()?r.neta:r.ventas)/r.n,color:'#5a8bff'})),{fmtV:fmt1})}</div></div>
+    <div class="card mt"><h3>Tabla por delegación</h3><p class="sub">Comerciales = personas con alguna visita o venta en el cuadro durante el periodo (si el cuadro no tiene datos, los que tienen ventas en la Estadística)${hasVis()?' · Visitas CRM = agendadas en el CRM':''}</p><div class="tbl-wrap"><table id="tDel"></table></div></div></div>`;
+  $('#tab').innerHTML=h;
+  renderTable('tDel',[
+    {key:'k',label:'Delegación',l:1},{key:'n',label:'Comerciales',fmt},{key:'visitas',label:'Visitas',fmt},{key:'demos',label:'Demos',fmt},{key:'pNulas',label:'% nulas',fmt:fmtP},
+    {key:'ventas',label:'Ventas (cuadro)',fmt},{key:'pCierre',label:'% cierre',fmt:fmtP},
+    ...(hasVen()?[{key:'prod',label:'Producidas',fmt},{key:'neta',label:'Netas',fmt:v=>`<b>${fmt(v)}</b>`},{key:'abon',label:'Abonadas',fmt},{key:'imp',label:'Importe confirmado',fmt:fmtE},{key:'netaCom',label:'Netas por comercial',fmt:fmt1}]:[]),
+    ...(hasVis()?[{key:'crm',label:'Visitas CRM',fmt}]:[]),
+  ],rows.map(r=>({...r,_zero:r._tec})),{sort:['neta',-1]});
+}
+
+/* ---------- Sinergias teleoperadora × comercial ---------- */
+function tabSinergias(F){
+  if(!hasVen()){$('#tab').innerHTML=missingVen();return;}
+  const K=['team'];
+  const all=venBase(F),bar=filterBar(all,K),rs=applyVF(all,K);
+  const conTO=rs.filter(r=>r.to),sinTO=rs.filter(r=>!r.to);
+  const disp=new Map();for(const r of conTO){const k=toKey(r.to),d=disp.get(k);if(!d||r.to.length>d.length)disp.set(k,r.to);}
+  const citas=new Map();for(const r of F.to){const k=toKey(r.person);citas.set(k,(citas.get(k)||0)+(r.producidas||0));}
+  const tos=[...groupBy(conTO,r=>toKey(r.to)).entries()].map(([k,g])=>{const a=aggVen(g),c=citas.get(k);
+    const bp=[...groupBy(g,r=>r.name).entries()].map(([n,x])=>({n,v:aggVen(x).neta})).sort((a,b)=>b.v-a.v)[0];
+    return{k,name:disp.get(k),...a,citas:c??null,v10:c?a.neta/c*10:null,ncom:new Set(g.map(r=>r.name)).size,best:bp&&bp.v>0?`${bp.n} (${fmt(bp.v)})`:'—'};});
+  const pairs=[...groupBy(conTO,r=>toKey(r.to)+'|'+r.name).values()].map(g=>{const a=aggVen(g);return{to:disp.get(toKey(g[0].to)),name:g[0].name,deleg:g[0].deleg,...a,pNeta:pct(a.neta,a.prod)};});
+  const topTO=[...tos].sort((a,b)=>b.neta-a.neta)[0],topP=[...pairs].sort((a,b)=>b.neta-a.neta||b.prod-a.prod)[0];
+  const sa=aggVen(sinTO),ta=aggVen(rs);
+  let h=`<div class="sec-title"><h2>Sinergias: teleoperadora × comercial</h2><p>Qué teleoperadora concertó cada venta (columna «Concertadora» de la Estadística) y qué comercial la cerró</p></div>${bar}`;
+  h+=kpiTiles([
+    {l:'Teleoperadora con más netas',v:topTO?esc(topTO.name):'—',s:topTO?`${fmt(topTO.neta)} netas de ${fmt(topTO.prod)} producidas`:'',hl:1},
+    {l:'Mejor pareja',v:topP?esc(topP.to.split(' ')[0])+' + '+esc(topP.name.split(' ')[0]):'—',s:topP?`${fmt(topP.neta)} netas juntas`:''},
+    {l:'Ventas con concertadora',v:fmtP(pct(ta.prod-sa.prod,ta.prod)),s:`${fmt(sa.prod)} producidas sin concertadora (VIP, autocaptado…)`},
+  ]);
+  if(F.to.length)h+=`<div class="notice mt"><div><b>Netas por cada 10 citas</b> = ventas netas ÷ citas concertadas (del cuadro de la Sala T.O.) × 10. Sirve para comparar a teleoperadoras que conciertan cantidades distintas.</div></div>`;
+  h+=`<div class="sec">${secTitle('Por teleoperadora','','dat')}<div class="card"><div class="tbl-wrap"><table id="tSTO"></table></div></div></div>`;
+  h+=`<div class="sec">${secTitle('Cruce teleoperadora × comercial','Ventas netas de cada pareja. Cuanto más oscura la casilla, más ventas.','dat')}<div class="card"><div class="tbl-wrap" id="heat"></div></div></div>`;
+  h+=`<div class="sec">${secTitle('Parejas','Todas las combinaciones con al menos una venta producida','dat')}<div class="card"><div class="tbl-wrap"><table id="tPar"></table></div></div></div>`;
+  $('#tab').innerHTML=h;bindVF();
+  renderTable('tSTO',[{key:'name',label:'Teleoperadora',l:1},...(F.to.length?[{key:'citas',label:'Citas concertadas',fmt}]:[]),{key:'prod',label:'Producidas',fmt},{key:'conf',label:'Confirmadas',fmt},{key:'neta',label:'Netas',fmt:v=>`<b>${fmt(v)}</b>`},
+    ...(F.to.length?[{key:'v10',label:'Netas por cada 10 citas',fmt:fmt1}]:[]),{key:'ncom',label:'Comerciales distintos',fmt},{key:'best',label:'Con quién vende más',l:1}],tos,{sort:['neta',-1]});
+  renderTable('tPar',[{key:'to',label:'Teleoperadora',l:1},{key:'name',label:'Comercial',l:1},{key:'deleg',label:'Delegación',l:1,html:r=>delegTag(r.deleg)},{key:'prod',label:'Producidas',fmt},{key:'neta',label:'Netas',fmt:v=>`<b>${fmt(v)}</b>`},{key:'pNeta',label:'% neta',fmt:fmtP}],pairs,{sort:['neta',-1]});
+  const coms=[...groupBy(conTO,r=>r.name).entries()].map(([n,g])=>({n,v:aggVen(g).neta})).sort((a,b)=>b.v-a.v).map(x=>x.n);
+  const rowsT=[...tos].sort((a,b)=>b.neta-a.neta),cell=new Map(pairs.map(p=>[toKey(p.to)+'|'+p.name,p])),mx=Math.max(1,...pairs.map(p=>p.neta));
+  $('#heat').innerHTML=`<table class="heat"><thead><tr><th class="l">Teleoperadora</th>${coms.map(c=>`<th title="${esc(c)}"><span>${esc(c)}</span></th>`).join('')}<th>Total</th></tr></thead><tbody>${rowsT.map(t=>`<tr><td class="l">${esc(t.name)}</td>${coms.map(c=>{const p=cell.get(t.k+'|'+c);if(!p)return '<td></td>';const a=Math.max(0,p.neta)/mx;return `<td title="${esc(t.name)} + ${esc(c)}: ${fmt(p.neta)} netas de ${fmt(p.prod)} producidas" style="background:rgba(41,104,254,${(.08+a*.82).toFixed(2)});color:${a>.5?'#fff':'var(--ink)'}">${fmt(p.neta)}</td>`;}).join('')}<td><b>${fmt(t.neta)}</b></td></tr>`).join('')}</tbody></table>`;
+}
+
+/* ---------- Previsión del cierre de mes ---------- */
+function weekdaysBetween(fromIso,toIso){const out=[];const[y,m,d]=fromIso.split('-').map(Number);const dt=new Date(Date.UTC(y,m-1,d));for(;;){dt.setUTCDate(dt.getUTCDate()+1);const iso=dt.toISOString().slice(0,10);if(iso>toIso)break;if(dt.getUTCDay()%6!==0)out.push(iso);}return out;}
+function tabPrevision(F){
+  if(!hasVen()){$('#tab').innerHTML=missingVen();return;}
+  const ds=allDates(),cut=state.range?state.range.to:ds[ds.length-1];
+  const[y,m]=cut.split('-').map(Number),mes=cut.slice(0,7),fin=isoOf(y,m,new Date(Date.UTC(y,m,0)).getUTCDate());
+  const inMes=r=>!r.date||r.date.slice(0,7)===mes;
+  const ven=venBase(F).filter(inMes),com=F.com.filter(r=>r.date.slice(0,7)===mes);
+  const W=workDays({com,to:F.to.filter(r=>r.date.slice(0,7)===mes)}),rest=weekdaysBetween(cut,fin),R=rest.length;
+  const G=aggVen(ven),res=G.conf+G.nul+G.noapto,tc=res?G.conf/res:null,abiertas=G.pend+G.cerr;
+  const ritmo=W.n?G.prod/W.n:0,futuras=ritmo*R;
+  const pProd=G.prod+futuras,pNeta=G.neta+(tc??0)*(abiertas+futuras);
+  // Real a final de mes, si los datos llegan más lejos que el corte (sirve para comprobar la previsión)
+  const real=state.data.ven.some(r=>r.date&&r.date>cut&&r.date.slice(0,7)===mes)?aggVen(withPerson(state.data.ven).filter(inMes)):null;
+  // Por comercial: su ritmo por día trabajado y lo esperado según la media de su delegación
+  const daysBy=new Map();for(const r of com)if(r.nulos||r.demos||r.ventas){const p=personOf(r.person).name;if(!daysBy.has(p))daysBy.set(p,new Set());daysBy.get(p).add(r.date);}
+  const ppl=[...groupBy(ven,r=>r.name).entries()].filter(([n,g])=>g[0].ok).map(([n,g])=>{const a=aggVen(g),dc=(daysBy.get(n)||new Set()).size,dt=dc||W.n||null;
+    const rit=dt?a.prod/dt:null,fut=(rit??0)*R;return{name:n,deleg:g[0].deleg,dt,dEst:!dc,...a,rit,pProd:a.prod+fut,pNeta:a.neta+(tc??0)*(a.pend+a.cerr+fut)};});
+  for(const d of new Set(ppl.map(p=>p.deleg))){const g=ppl.filter(p=>p.deleg===d&&p.dt&&!p.dEst),md=sum(g,'prod')/Math.max(1,sum(g,'dt'));for(const p of ppl.filter(p=>p.deleg===d)){p.esp=p.dt&&g.length?md*p.dt:null;p.dif=p.esp!=null?p.prod-p.esp:null;p.mdD=md;}}
+  let h=`<div class="sec-title"><h2>Previsión de ${MESES[m-1].toLowerCase()}</h2><p>Con los datos hasta el ${dLong(cut)}: ${W.n} días laborables con datos y ${R} por delante (lunes a viernes; no descuenta festivos)</p></div>`;
+  h+=kpiTiles([
+    {l:'Producidas a fin de mes',v:fmt1(pProd),s:`llevamos ${fmt(G.prod)} · ritmo de ${fmt1(ritmo)} al día`,hl:1},
+    {l:'Netas a fin de mes',v:fmt1(pNeta),s:`llevamos ${fmt(G.neta)} · ${fmt(abiertas)} aún sin resolver`},
+    {l:'Tasa de confirmación',v:fmtP(tc),s:`de las ventas ya resueltas del mes, ${fmt(G.conf)} confirmadas de ${fmt(res)}`},
+    {l:'Días que quedan',v:fmt(R),s:R?`del ${dLabel(rest[0])} al ${dLabel(rest[R-1])}`:'el mes ya está completo'},
+  ]);
+  h+=`<div class="notice mt"><div><b>Cómo se calcula:</b> las producidas siguen el ritmo de cada día de este mes. Para las netas se suman a las que ya hay las ventas sin resolver y las que faltan por producir, multiplicadas por la tasa de confirmación del mes. Es una <b>estimación</b>: no tiene en cuenta festivos, vacaciones ni objetivos (todavía no hay objetivos por comercial).${real?` <br><b>Comprobación:</b> los datos llegan más allá del ${dLabel(cut)}. Al final del mes hubo <b>${fmt(real.prod)} producidas</b> (previsión ${fmt1(pProd)}) y <b>${fmt(real.neta)} netas</b> hasta ahora (previsión ${fmt1(pNeta)}).`:''}</div></div>`;
+  h+=`<div class="sec">${secTitle('Ventas producidas acumuladas','Lo que llevamos y hacia dónde vamos','dat')}<div class="card"><div class="chart-box" style="height:260px"><canvas id="chPrev"></canvas></div></div></div>`;
+  h+=`<div class="sec">${secTitle('Qué se espera de cada comercial','Su ritmo a fin de mes y lo que se esperaría si vendiera como la media de su delegación en los días que ha trabajado','int')}<div class="card"><p class="sub">«Diferencia» = producidas − lo esperado con la media de su delegación. En verde, por encima; en rojo, por debajo. Días trabajados = días con visitas en el cuadro (con * los que no salen en el cuadro, como VIP: se usan los días laborables del mes).</p><div class="tbl-wrap"><table id="tPrev"></table></div></div></div>`;
+  $('#tab').innerHTML=h;
+  const days=[...new Set(ven.filter(r=>r.prod&&r.date&&r.date<=cut).map(r=>r.date).concat(com.map(r=>r.date)))].filter(d=>d<=cut).sort();
+  let acc=0;const real1=days.map(d=>acc+=sum(ven.filter(r=>r.prod&&r.date===d),r=>r.w??1));
+  const lab=days.concat(rest),proj=lab.map((d,i)=>i<days.length-1?null:i===days.length-1?acc:acc+ritmo*(i-days.length+1));
+  const o=baseOpts();o.plugins.legend={display:true,position:'bottom',labels:{boxWidth:10,usePointStyle:true}};
+  mkChart('chPrev',{type:'line',data:{labels:lab.map(dLabel),datasets:[{label:'Producidas (real)',data:real1,borderColor:'#2968fe',backgroundColor:'rgba(41,104,254,.12)',fill:true,tension:.25,pointRadius:0,borderWidth:2.5},{label:'Previsión',data:proj,borderColor:'#2968fe',borderDash:[6,5],pointRadius:0,borderWidth:2,fill:false}]},options:o});
+  const sg=v=>v==null?'<span class="muted">—</span>':`<span class="rate ${v>=.5?'hi':v<=-.5?'lo':''}">${v>0?'+':''}${fmt1(v)}</span>`;
+  renderTable('tPrev',[
+    {key:'name',label:'Comercial',l:1},{key:'deleg',label:'Delegación',l:1,html:r=>delegTag(r.deleg)},{key:'dt',label:'Días trabajados',fmt:(v,r)=>r.dEst?`<span class="muted" title="No sale en el cuadro: se usan los días laborables del mes">${fmt(v)}*</span>`:fmt(v)},
+    {key:'prod',label:'Producidas',fmt},{key:'rit',label:'Al día',fmt:fmt1},{key:'pProd',label:'Previsión producidas',fmt:v=>`<b>${fmt1(v)}</b>`},
+    {key:'neta',label:'Netas',fmt},{key:'pNeta',label:'Previsión netas',fmt:v=>`<b>${fmt1(v)}</b>`},
+    {key:'esp',label:'Esperado (media delegación)',fmt:fmt1},{key:'dif',label:'Diferencia',fmt:sg},
+  ],ppl,{sort:['pNeta',-1]});
+}
+
+/* ============================== TAB: MAILING ============================== */
+function tabMailing(F){
+  const com=F.com.filter(r=>r.team===MAIL),ven=hasVen()?venBase(F).filter(r=>r.team===MAIL):[];
+  if(!com.length&&!ven.length){$('#tab').innerHTML=`<div class="card missing"><h3>No hay datos de Mailing en este periodo</h3><p>Salen de la pestaña MAILING del cuadro de comerciales (existe desde noviembre de 2026) y de OFERTA RECU de la Estadística.</p></div>`;return;}
+  const per=new Map();const P=n=>{if(!per.has(n))per.set(n,{name:n,ced:0,nulos:0,errores:0,noloc:0,demos:0,ventas:0,v:[]});return per.get(n);};
+  for(const r of com){const o=P(r.person);for(const k of['ced','nulos','errores','noloc','demos','ventas'])o[k]+=r[k]||0;}
+  for(const r of ven)P(r.name).v.push(r);
+  const rows=[...per.values()].map(o=>{const a=aggVen(o.v),c=o.v.filter(r=>r.est==='conf');return{...o,pVen:pct(o.ventas,o.ced),prod:a.prod,neta:a.neta,abon:a.abon,imp:sum(c,'imp')};});
+  const T=k=>sum(rows,k),av=aggVen(ven);
+  let h=`<div class="sec-title"><h2>Equipo Mailing</h2><p>Teleoperadoras de venta: venden por teléfono a los leads de fuera de la zona de trabajo</p></div>`;
+  h+=kpiTiles([
+    ...(com.length?[{l:'Leads trabajados',v:fmt(T('ced')),s:'cedidos en el cuadro'},{l:'Ventas (cuadro)',v:fmt(T('ventas')),s:`${fmtP(pct(T('ventas'),T('ced')))} de los leads trabajados`,hl:1}]:[]),
+    ...(hasVen()?[{l:'Ventas netas (Estadística)',v:fmt(av.neta),s:`${fmt(av.prod)} producidas en OFERTA RECU (cuentan 0,5)`,hl:!com.length},{l:'Importe confirmado',v:fmtE(T('imp')),s:`${fmt(av.abon)} abonadas`}]:[]),
+  ]);
+  h+=`<div class="notice mt"><div>${com.length?'':'<b>El cuadro de comerciales de este periodo no tiene pestaña MAILING</b> (empezó en noviembre): solo se ven las ventas de la Estadística. '}Las ventas de Mailing están en <b>OFERTA RECU</b>, así que cuentan <b>0,5</b>, igual que el resto de RECU. Ana Gálvez pasa de comercial a Mailing: en los meses en que estaba en el equipo de Córdoba, sus datos salen allí.</div></div>`;
+  h+=`<div class="sec">${secTitle('Por persona','','dat')}<div class="card"><div class="tbl-wrap"><table id="tMail"></table></div></div></div>`;
+  $('#tab').innerHTML=h;
+  renderTable('tMail',[{key:'name',label:'Persona',l:1},...(com.length?[{key:'ced',label:'Leads',fmt},{key:'nulos',label:'Nulos',fmt},{key:'errores',label:'Errores',fmt},{key:'noloc',label:'No localizables',fmt},{key:'demos',label:'Demos',fmt},{key:'ventas',label:'Ventas (cuadro)',fmt:v=>`<b>${fmt(v)}</b>`},{key:'pVen',label:'% venta',fmt:fmtP}]:[]),
+    ...(hasVen()?[{key:'prod',label:'Producidas (Est.)',fmt},{key:'neta',label:'Netas (Est.)',fmt:v=>`<b>${fmt(v)}</b>`},{key:'imp',label:'Importe confirmado',fmt:fmtE}]:[])],
+    rows,{sort:[com.length?'ventas':'neta',-1],total:{name:'Total',ced:T('ced'),nulos:T('nulos'),errores:T('errores'),noloc:T('noloc'),demos:T('demos'),ventas:T('ventas'),pVen:pct(T('ventas'),T('ced')),prod:av.prod,neta:av.neta,imp:T('imp')}});
+}
+/* ============================== TAB: COMISIONES (en construcción) ============================== */
+function tabComisiones(){
+  $('#tab').innerHTML=`<div class="card missing"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M4.2 7l2.6 1.5M17.2 15.5l2.6 1.5M4.2 17l2.6-1.5M17.2 8.5l2.6-1.5"/><circle cx="12" cy="12" r="3"/></svg></div><h3>En construcción</h3><p>Aquí irán las comisiones de cada comercial. Solo las verán los administradores. Falta definir cómo se calculan.</p></div>`;
+}
+
+/* ============================== TAB: VISITAS (CRM) ============================== */
+function tabVisitas(F){
+  if(!hasVis()){$('#tab').innerHTML=missingVis();return;}
+  const all=withPerson(F.vis);
+  const teams=[...new Set(all.map(r=>r.team).filter(Boolean))].sort((a,b)=>(a===SPECIAL)-(b===SPECIAL)||a.localeCompare(b));
+  if(state.team!=='all'&&!teams.includes(state.team))state.team='all';
+  const recs=all.filter(r=>state.team==='all'||r.team===state.team);
+  const a=aggVis(recs),cm=hasCom();
+  const comBy=groupBy(F.com,r=>r.person);
+  const people=[...groupBy(recs,r=>r.name).entries()].map(([n,rs])=>{const x=aggVis(rs);const c=cm&&comBy.has(n)?aggCom(comBy.get(n)):null;
+    return{name:n,team:rs[0].team,...x,pSin:pct(x.sinres,x.n),cuadro:c?c.visitas:null,diff:c?x.n-c.visitas:null,_out:!rs[0].ok};});
+  const W=daysOf(recs);
+  let h=`<div class="sec-title"><h2>${state.team==='all'?'Todos':state.team===SPECIAL?'VIP':'Equipo '+esc(state.team)}</h2><p>Según el CRM (${esc(state.files.vis||'')})</p><div class="right">${teamSelect(teams)}</div></div>`;
+  h+=kpiTiles([
+    {l:'Visitas agendadas',v:fmt(a.n),s:'en el CRM, con o sin resultado',d:dayTag(a.n,W.n),hl:1},
+    {l:'Con resultado',v:fmt(a.n-a.sinres),s:`${fmt(a.nulo)} nulas · ${fmt(a.demo)} con demo`},
+    {l:'Sin resultado',v:fmtP(pct(a.sinres,a.n)),s:`${fmt(a.sinres)} en pendiente, inicio, ilocalizable o espera de documentación`},
+    ...(cm?[{l:'Visitas en el cuadro',v:fmt(aggCom(F.com.filter(r=>state.team==='all'?!otherTeam(r.team):r.team===state.team)).visitas),s:'nulos + demos del cuadro de comerciales'}]:[]),
+  ]);
+  h+=`<div class="notice mt"><div>En el CRM muchas visitas se quedan sin cerrar, así que <b>los nulos y las demos se toman del cuadro de comerciales</b>. Del CRM solo se cuentan las visitas agendadas. Al exportar, filtra por <b>fecha de la visita</b>.</div></div>`;
+  h+=`<div class="sec">${secTitle('Por comercial','','dat')}<div class="card"><h3>Visitas por comercial</h3><p class="sub">«Sin resultado» = pendiente, inicio, ilocalizable o espera de documentación${cm?' · «Diferencia» = visitas del CRM − visitas del cuadro':''} · En gris: usuarios del CRM que no están en el cuadro</p><div class="tbl-wrap"><table id="tVis"></table></div></div></div>`;
+  $('#tab').innerHTML=h;
+  $('#teamSel').onchange=e=>{state.team=e.target.value;renderTab();};
+  const avg=pct(a.sinres,a.n);
+  renderTable('tVis',[
+    {key:'name',label:'Comercial',l:1},{key:'team',label:'Equipo',l:1,html:r=>teamTag(r.team)},
+    {key:'n',label:'Visitas CRM',fmt:v=>`<b>${fmt(v)}</b>`},{key:'nulo',label:'Nulas CRM',fmt},{key:'demo',label:'Demos CRM',fmt},{key:'sinres',label:'Sin resultado',fmt},
+    {key:'pSin',label:'% sin resultado',fmt:(v,r)=>r.name!=='Total'&&v!=null&&avg!=null&&v>avg*1.5?`<span class="rate lo">${fmtP(v)}</span>`:fmtP(v)},
+    ...(cm?[{key:'cuadro',label:'Visitas cuadro',fmt},{key:'diff',label:'Diferencia',fmt:v=>v==null?'—':(v>0?'+':'')+fmt(v)}]:[]),
+  ],people.map(p=>({...p,_zero:p._out})),{sort:['n',-1],total:{name:'Total',team:'',...a,pSin:avg,cuadro:null,diff:null}});
+}
+
 /* ============================== STATE ============================== */
 const hashTab=()=>{const h=location.hash.slice(1);return PAGES[h]?h:null;};
 const state={
-  data:{to:[],com:[],tec:[]},
+  data:{to:[],com:[],tec:[],ven:[],vis:[]},
   roster:{to:[],com:[],tec:[]},
-  files:{},parseWarnings:{to:[],com:[],tec:[]},
+  files:{},parseWarnings:{to:[],com:[],tec:[],ven:[],vis:[]},
   version:null,dirty:false,
-  range:null,preset:'all',team:'all',funSrc:'all',
+  range:null,preset:'all',team:'all',funSrc:'all',vf:{team:'all',seller:'all',of:'all',est:'all',src:'all',cat:'all'},
   tab:hashTab()||(PAGES[store.get('cb_tab')]?store.get('cb_tab'):'resumen'),
 };
 let versions=[];
@@ -670,11 +1115,11 @@ const newId=()=>'v'+Date.now().toString(36)+Math.random().toString(36).slice(2,6
 function snapshot(name){return{id:newId(),name,savedAt:new Date().toISOString(),by:gh.role||undefined,files:{...state.files},data:state.data,roster:state.roster,parseWarnings:state.parseWarnings,schema:3};}
 const migrateRecs=a=>(a||[]).map(r=>LEGACY_SRC[r.src]?{...r,src:LEGACY_SRC[r.src]}:r);
 function loadSnapshot(v){
-  state.data={to:migrateRecs(v.data.to),com:migrateRecs(v.data.com),tec:v.data.tec||[]};
+  state.data={to:migrateRecs(v.data.to),com:migrateRecs(v.data.com),tec:v.data.tec||[],ven:v.data.ven||[],vis:v.data.vis||[]};
   state.roster=v.roster||{to:[],com:[],tec:[]};
-  state.files=v.files||{};state.parseWarnings=v.parseWarnings||{to:[],com:[],tec:[]};
+  state.files=v.files||{};state.parseWarnings={to:[],com:[],tec:[],ven:[],vis:[],...(v.parseWarnings||{})};
   state.version={id:v.id,name:v.name,savedAt:v.savedAt};state.dirty=false;
-  state.preset='all';state.range=null;state.team='all';
+  state.team='all';defaultRange();
   render();
 }
 function defaultVersionName(){
@@ -728,7 +1173,18 @@ async function handleFiles(fileList){
   for(const f of files){
     if(/\.numbers$/i.test(f.name)){toast(`«${f.name}» es de Numbers: expórtalo antes a Excel (Archivo › Exportar a › Excel).`);continue;}
     try{
-      const wb=XLSX.read(await f.arrayBuffer(),{type:'array',cellDates:false});
+      const buf=await f.arrayBuffer();
+      if(/\.(xls|html?)$/i.test(f.name)){
+        const txt=new TextDecoder('windows-1252').decode(buf);
+        if(isVisitas(txt)){const v=parseVisitas(txt);if(!v.length){toast(`«${f.name}» no tiene visitas.`);continue;}
+          state.data.vis=v;state.files.vis=f.name;state.parseWarnings.vis=[];loaded.push('vis');continue;}
+      }
+      const wb=XLSX.read(buf,{type:'array',cellDates:false});
+      if(isGlobal(wb)){const g=parseGlobal(wb,f.name);
+        if(!g.month){toast(`No sé de qué mes es «${f.name}». Pon el mes en el nombre del archivo (p. ej. «GLOBAL OCTUBRE»).`);continue;}
+        const y=yearFor(g.month);
+        state.data.ven=g.recs.map(r=>{const{day,...o}=r;return{...o,date:day?isoOf(y,g.month,day):null};});
+        state.files.ven=f.name;state.parseWarnings.ven=g.warnings;loaded.push('ven');continue;}
       const p=parseWorkbook(wb);
       if(!p.kinds.size){toast(`No he reconocido las hojas de «${f.name}». ¿Es el archivo de producción?`);continue;}
       for(const k of p.kinds){state.data[k]=p[k];state.roster[k]=p.roster[k];state.files[k]=f.name;state.parseWarnings[k]=p.warnings.filter(w=>w.kind===k);}
@@ -736,19 +1192,23 @@ async function handleFiles(fileList){
     }catch(e){console.error(e);toast(`No se pudo leer «${f.name}».`);}
   }
   if(loaded.length){
-    state.version=null;state.dirty=true;state.preset='all';state.range=null;
+    state.version=null;state.dirty=true;defaultRange();
     if(loaded.includes('to')&&!loaded.includes('com')&&!['resumen','analisis','origen','registros','leads'].includes(state.tab))state.tab='teleoperadoras';
-    render();toast(loaded.includes('to')&&loaded.includes('com')?'Archivos cargados':loaded.includes('to')?'Sala T.O. cargada':'Equipo Comercial cargado');
+    const NOM={com:'Equipo Comercial',to:'Sala T.O.',tec:'Consultores técnicos',ven:'Estadística',vis:'Visitas del CRM'};
+    render();toast('Cargado: '+[...new Set(loaded)].filter(k=>k!=='tec').map(k=>NOM[k]).join(', '));
   }
 }
 const hasCom=()=>state.data.com.length>0||!!state.files.com;
 const hasTO=()=>state.data.to.length>0||!!state.files.to;
-const hasAnyData=()=>hasCom()||hasTO();
+const hasAnyData=()=>hasCom()||hasTO()||hasVen()||hasVis();
 
 /* ============================== FILTER + AGG ============================== */
-function allDates(){const s=new Set();for(const k of['to','com','tec'])for(const r of state.data[k])s.add(r.date);return[...s].sort();}
+function allDates(){const s=new Set();for(const k of['to','com','tec','ven','vis'])for(const r of state.data[k])if(r.date)s.add(r.date);return[...s].sort();}
 const inRange=r=>!state.range||(r.date>=state.range.from&&r.date<=state.range.to);
-function filtered(){return{to:state.data.to.filter(inRange),com:state.data.com.filter(inRange),tec:state.data.tec.filter(inRange)};}
+function commonDay(){const LD=lastDays();return LD.length>1&&new Set(LD.map(x=>x.d)).size>1?LD.map(x=>x.d).sort()[0]:null;}
+// Al cargar datos o abrir una versión: si los archivos no llegan al mismo día, se corta en el día común
+function defaultRange(){const c=commonDay(),ds=allDates();if(c&&ds.length&&c<ds[ds.length-1]){state.preset='comun';state.range={from:ds[0],to:c};}else{state.preset='all';state.range=null;}}
+function filtered(){return{to:state.data.to.filter(inRange),com:state.data.com.filter(inRange),tec:state.data.tec.filter(inRange),ven:state.data.ven.filter(r=>!r.date||inRange(r)),vis:state.data.vis.filter(inRange)};}
 function aggCom(r){const nulos=sum(r,'nulos'),demos=sum(r,'demos'),ventas=sum(r,'ventas');return{nulos,demos,ventas,visitas:nulos+demos};}
 function aggTO(r){const ced=sum(r,'ced'),nulos=sum(r,'nulos'),errores=sum(r,'errores'),noloc=sum(r,'noloc'),citas=sum(r,'producidas');return{ced,nulos,errores,noloc,citas,resueltos:nulos+errores+noloc+citas};}
 function aggTec(r){return{ced:sum(r,'ced'),nulos:sum(r,'nulos'),noloc:sum(r,'noloc'),demos:sum(r,'demos'),ventas:sum(r,'ventas')};}
@@ -772,17 +1232,21 @@ function render(){
 function renderSide(){
   const nW=computeWarnings(filtered()).filter(w=>w.lvl!=='info').length;
   const svg=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</svg>`;
-  let h=NAV.map(g=>`<div class="nav-g"><div class="nav-h">${g.h}</div>${g.items.map(i=>`<button class="nav-i ${state.tab===i.id?'on':''}" data-tab="${i.id}">${svg(i.ic)}${i.label}${i.src?`<span class="sw" style="background:${srcColor(i.src)}"></span>`:''}${i.id==='calidad'&&nW?`<span class="cnt">${nW}</span>`:''}</button>`).join('')}</div>`).join('');
+  let h=NAV.map(g=>({...g,items:g.items.filter(i=>!i.admin||isAdmin())})).filter(g=>g.items.length).map(g=>`<div class="nav-g"><div class="nav-h">${g.h}</div>${g.items.map(i=>`<button class="nav-i ${state.tab===i.id?'on':''}" data-tab="${i.id}">${svg(i.ic)}${i.label}${i.src?`<span class="sw" style="background:${srcColor(i.src)}"></span>`:''}${i.id==='calidad'&&nW?`<span class="cnt">${nW}</span>`:''}</button>`).join('')}</div>`).join('');
   const ds=allDates();
   h+=`<div class="side-foot">
     <div class="fl ${state.files.com?'':'miss'}" ${state.files.com?`title="${esc(state.files.com)}"`:'data-up="1"'}>${state.files.com?'<span class="dot ok"></span>Equipo Comercial':'+ Subir Equipo Comercial'}</div>
     <div class="fl ${state.files.to?'':'miss'}" ${state.files.to?`title="${esc(state.files.to)}"`:'data-up="1"'}>${state.files.to?'<span class="dot ok"></span>Sala T.O.':'+ Subir Sala T.O.'}</div>
+    <div class="fl ${state.files.ven?'':'miss'}" ${state.files.ven?`title="${esc(state.files.ven)}"`:'data-up="1"'}>${state.files.ven?'<span class="dot ok"></span>Estadística':'+ Subir Estadística'}</div>
+    <div class="fl ${state.files.vis?'':'miss'}" ${state.files.vis?`title="${esc(state.files.vis)}"`:'data-up="1"'}>${state.files.vis?'<span class="dot ok"></span>Visitas del CRM':'+ Subir visitas del CRM'}</div>
     ${ds.length?`<div style="margin-top:6px">Datos del ${dLabel(ds[0])} al ${dLong(ds[ds.length-1])}</div>`:''}</div>`;
   $('#side').innerHTML=h;
 }
 function renderHeader(){
   const p=PAGES[state.tab]||PAGES.resumen;
-  $('#ph').innerHTML=`<div><div class="eyebrow">${esc(p.e)}</div><h1>${esc(p.t)}</h1><p>${esc(p.p)}</p></div>`;
+  const ds=allDates(),hasta=state.range?state.range.to:ds[ds.length-1];
+  const badge=hasta?`<div class="right data-badge"><span class="db-l">Datos hasta el</span><b>${dLong(hasta)}</b><span class="db-v">${state.version?'Versión: '+esc(state.version.name):'Carga sin guardar'}</span></div>`:'';
+  $('#ph').innerHTML=`<div><div class="eyebrow">${esc(p.e)}</div><h1>${esc(p.t)}</h1><p>${esc(p.p)}</p></div>${badge}`;
   $('#ph').style.animation='none';void $('#ph').offsetWidth;$('#ph').style.animation='';
 }
 function renderFilters(){
@@ -790,15 +1254,19 @@ function renderFilters(){
   const weeks=[...groupBy(ds,mondayOf).entries()];
   let h=`<span class="lbl">Periodo</span><button class="chip ${state.preset==='all'?'on':''}" data-p="all">Todo</button>`;
   for(const[mon,d]of weeks){const lab=d.length>1?`${dLabel(d[0])} – ${dLabel(d[d.length-1])}`:dLabel(d[0]);h+=`<button class="chip ${state.preset==='w'+mon?'on':''}" data-p="w${mon}" data-from="${d[0]}" data-to="${d[d.length-1]}">${lab}</button>`;}
+  const LD=lastDays(),comun=commonDay();
+  if(comun&&comun<ds[ds.length-1])h+=`<button class="chip ${state.preset==='comun'?'on':''}" data-p="comun" data-from="${ds[0]}" data-to="${comun}" title="Último día al que llegan todos los archivos">Hasta el día común (${dLabel(comun)})</button>`;
   const fr=state.range?state.range.from:ds[0],to=state.range?state.range.to:ds[ds.length-1];
   h+=`<span class="range">Desde <input type="date" id="dFrom" value="${fr}" min="${ds[0]}" max="${ds[ds.length-1]}"> hasta <input type="date" id="dTo" value="${to}" min="${ds[0]}" max="${ds[ds.length-1]}"></span>`;
+  if(comun&&state.preset==='comun')h+=`<div class="common-note">⚑ Los datos se muestran <b>hasta el ${dLong(comun)}</b>, el último día al que llegan todos los archivos (${LD.map(x=>`${esc(x.l)}: ${dLabel(x.d)}`).join(' · ')}). Pulsa «Todo» para ver cada archivo completo.</div>`;
   $('#filters').innerHTML=h;
 }
 function destroyCharts(){for(const k in charts){charts[k].destroy();delete charts[k];}}
 function renderTab(){
   destroyCharts();
   const F=filtered();
-  const fns={resumen:tabResumen,analisis:tabAnalisis,origen:tabOrigenGeneral,registros:F=>tabOrigen(F,REG),leads:F=>tabOrigen(F,LEAD),comerciales:tabComerciales,vip:tabVIP,teleoperadoras:tabTO,tecnicos:tabTec,calidad:tabCalidad};
+  if(isAdminOnly(state.tab)&&!isAdmin())state.tab='resumen';
+  const fns={mailing:tabMailing,comisiones:tabComisiones,resumen:tabResumen,analisis:tabAnalisis,origen:tabOrigenGeneral,registros:F=>tabOrigen(F,REG),leads:F=>tabOrigen(F,LEAD),comerciales:tabComerciales,ventas:tabVentas,desglose:tabDesglose,productos:tabProductos,delegaciones:tabDelegaciones,sinergias:tabSinergias,prevision:tabPrevision,visitas:tabVisitas,vip:tabVIP,teleoperadoras:tabTO,tecnicos:tabTec,calidad:tabCalidad};
   (fns[state.tab]||tabResumen)(F);
   animateIn();
 }
@@ -1003,7 +1471,7 @@ function repartoHTML(all,teams){
       <div class="rank">${b.list.length?b.list.map((x,i)=>`<div class="ri"><div class="pos">${i+1}</div><div class="nm"><b>${esc(x.p)}</b><span>${x.team===SPECIAL?'VIP':'Equipo '+esc(x.team)}</span></div><div class="val">${fmtP(x.rate)}<span>${fmt(x.ventas)} de ${fmt(x.demos)} demos</span></div></div>`).join(''):'<p class="muted" style="font-size:13px">Nadie llega a 3 demos de este origen todavía.</p>'}</div></div>`).join('')}</div>
   </div>`;
 }
-const comTeams=()=>[...new Set(rosterNames('com').map(x=>x.team).concat(state.data.com.map(r=>r.team)))].filter(t=>t!==SPECIAL);
+const comTeams=()=>[...new Set(rosterNames('com').map(x=>x.team).concat(state.data.com.map(r=>r.team)))].filter(t=>!otherTeam(t));
 
 /* ============================== TAB: RESUMEN ============================== */
 function keyInsights(F){
@@ -1012,11 +1480,13 @@ function keyInsights(F){
     const better=(l.pCierre??0)>=(r.pCierre??0)?l:r,worse=better===l?r:l;
     out.push({cls:'int',ic:'⇄',html:`Con <b>${better.name.toLowerCase()}</b> se cierra el <b>${fmtP(better.pCierre)}</b> de las demos, frente al ${fmtP(worse.pCierre)} con ${worse.name.toLowerCase()}.${r.epv&&l.epv?` Hacen falta <b>${fmt1(r.epv)} registros</b> por venta y <b>${fmt1(l.epv)} leads</b>.`:''}`});
   }
-  const teams=comTeams();const all=F.com.filter(x=>x.team!==SPECIAL);
+  const teams=comTeams();const all=F.com.filter(x=>!otherTeam(x.team));
   if(teams.length>1){const A=allocation(all,teams);const worst=A.ins.find(x=>x.cls==='neg');if(worst)out.push(worst);}
   const W=daysOf(F.com),c=aggCom(F.com),te=aggTec(F.tec);
   if(W.n)out.push({cls:'neu',ic:'≈',html:`Ritmo actual: <b>${fmt1((c.ventas+te.ventas)/W.n)} ventas</b> y <b>${fmt1(c.demos/W.n)} demos</b> por día laborable (${W.n} días con datos, hasta el ${dLabel(W.last)}).`});
   const{bestC}=weekdayBest(F);if(bestC)out.push({cls:'neu',ic:'◷',html:`El día que mejor se cierra es el <b>${bestC.name.toLowerCase()}</b> (${fmtP(bestC.pCierre)}).`});
+  if(hasVen()){const v=aggVen(F.ven);if(v.prod)out.push({cls:v.neta/v.prod<.5?'neg':'neu',ic:'€',html:`De <b>${fmt(v.prod)} ventas producidas</b> quedan <b>${fmt(v.neta)} netas</b> (${fmtP(pct(v.neta,v.prod))}): ${fmt(v.nul)} nulas, ${fmt(v.noapto)} no aptas, ${fmt(v.retro)} ${v.retro===1?'retroceso':'retrocesos'} y ${fmt(v.cerr+v.pend)} aún sin resolver. <a href="#ventas" data-go="ventas">Ver ventas</a>.`});}
+  if(hasVis()){const v=aggVis(F.vis);if(v.n)out.push({cls:pct(v.sinres,v.n)>.3?'neg':'neu',ic:'⌖',html:`<b>${fmt(v.sinres)} de ${fmt(v.n)} visitas del CRM</b> (${fmtP(pct(v.sinres,v.n))}) siguen sin resultado: pendientes, en inicio o ilocalizables. <a href="#visitas" data-go="visitas">Ver visitas</a>.`});}
   const nW=computeWarnings(F).filter(w=>w.lvl!=='info').length;
   if(nW)out.push({cls:'neg',ic:'!',html:`Hay <b>${nW} ${nW===1?'aviso':'avisos'}</b> sobre la calidad de los datos. <a href="#calidad" data-go="calidad">Revisarlos</a>.`});
   return out;
@@ -1030,6 +1500,7 @@ function tabResumen(F){
   const ins=keyInsights(F);
   let h=kpiTiles([
     {l:'Ventas totales',v:fmt(c.ventas+te.ventas),s:`${fmt(c.ventas)} comerciales · ${fmt(te.ventas)} técnicos`,d:dayTag(c.ventas+te.ventas,Wc.n),hl:1},
+    ...(hasVen()?[(()=>{const v=aggVen(F.ven);return{l:'Ventas netas',v:fmt(v.neta),s:`${fmt(v.prod)} producidas · ${fmt(v.abon)} abonadas · ${fmt(v.pend)} por confirmar (Estadística)`};})()]:[]),
     {l:'% de cierre comerciales',v:fmtP(pct(c.ventas,c.demos)),s:`${fmt(c.ventas)} ventas de ${fmt(c.demos)} demos`},
     {l:'Demos realizadas',v:hasCom()?fmt(c.demos):'—',s:hasCom()?`${fmtP(pct(c.demos,c.visitas))} de ${fmt(c.visitas)} visitas`:'Falta el Excel comercial',d:dayTag(c.demos,Wc.n)},
     {l:'Citas concertadas',v:hasTO()?fmt(t.citas):'—',s:t.ced?`${fmtP(pct(t.citas,t.ced))} de ${fmt(t.ced)} registros y leads`:'Falta el Excel de la Sala T.O.',d:hasTO()?dayTag(t.citas,Wt.n):null},
@@ -1055,7 +1526,7 @@ function tabResumen(F){
 function tabAnalisis(F){
   let h='';
   if(hasCom()){
-    const teams=comTeams(),all=F.com.filter(r=>r.team!==SPECIAL);
+    const teams=comTeams(),all=F.com.filter(r=>!otherTeam(r.team));
     h+=`<div class="sec" style="margin-top:0">${secTitle('Reparto de registros y leads','¿Está cada origen en manos de quien mejor lo cierra?','int')}${repartoHTML(all,teams)}</div>`;
   }else h+=missingFile('com');
   h+=weekdayHTML(F);
@@ -1153,14 +1624,19 @@ function totalRow(recs,srcs,W){const a=aggCom(recs);const o={name:'Total',team:'
 function tabComerciales(F){
   if(!hasCom()){$('#tab').innerHTML=missingFile('com');return;}
   const W=daysOf(F.com);
-  const all=F.com.filter(r=>r.team!==SPECIAL);
+  const all=F.com.filter(r=>!otherTeam(r.team));
   const teams=comTeams();
   if(state.team!=='all'&&!teams.includes(state.team))state.team='all';
   const recs=all.filter(r=>state.team==='all'||r.team===state.team);
   const srcs=sourcesOf(recs.length?recs:all);
   const a=aggCom(recs);const avgC=pct(a.ventas,a.demos),avgN=pct(a.nulos,a.visitas);
-  const roster=rosterNames('com').filter(x=>x.team!==SPECIAL&&(state.team==='all'||x.team===state.team));
+  const roster=rosterNames('com').filter(x=>!otherTeam(x.team)&&(state.team==='all'||x.team===state.team));
   const people=peopleRows(recs,roster,srcs,W);
+  const vBy=hasVis()?groupBy(withPerson(F.vis),r=>r.name):null,eBy=hasVen()?groupBy(withPerson(F.ven),r=>r.name):null;
+  for(const p of people){
+    if(vBy){const x=aggVis(vBy.get(p.name)||[]);p.crm=x.n;p.crmSin=x.sinres;p.pCrmSin=pct(x.sinres,x.n);}
+    if(eBy){const x=aggVen(eBy.get(p.name)||[]);p.neta=x.neta;p.abon=x.abon;p.pend=x.pend;}
+  }
   const active=people.filter(p=>!p._zero);
   const top=[...active].sort((x,y)=>y.ventas-x.ventas)[0];
   const teamSel=`<label class="vsel" style="max-width:none"><span class="lb">Equipo</span><select id="teamSel"><option value="all">Todos</option>${teams.map(t=>`<option value="${esc(t)}" ${state.team===t?'selected':''}>${esc(t)}</option>`).join('')}</select></label>`;
@@ -1186,7 +1662,7 @@ function tabComerciales(F){
   h+=`<div class="sec">${secTitle('Ranking individual','','dat')}
   <div class="grid g2"><div class="card"><h3>Ventas por comercial</h3><p class="sub">Por origen</p>${legend(srcs.map(s=>[s,srcColor(s)]))}<div class="chart-box" id="bxCom"><canvas id="chCom"></canvas></div></div>
   <div class="card"><h3>% de cierre por comercial</h3><p class="sub">Ventas ÷ demos · la línea marca la media</p><div class="chart-box" id="bxCie"><canvas id="chCie"></canvas></div></div></div>
-  <div class="card mt"><h3>Tabla de comerciales</h3><p class="sub">Verde: por encima de la media · Rojo: menos de la mitad de la media${people.some(p=>p._zero)?' · En gris: sin actividad':''} · «/ día» = media por día laborable (${daysTxt(W)})</p><div class="tbl-wrap"><table id="tCom"></table></div></div></div>`;
+  <div class="card mt"><h3>Tabla de comerciales</h3><p class="sub">${hasVis()||hasVen()?`Visitas, nulas, demos y ventas: cuadro de comerciales${hasVis()?' · Visitas CRM: SMI CRM':''}${hasVen()?' · Netas, abonadas y por confirmar: Estadística':''} · `:''}Verde: por encima de la media · Rojo: menos de la mitad de la media${people.some(p=>p._zero)?' · En gris: sin actividad':''} · «/ día» = media por día laborable (${daysTxt(W)})</p><div class="tbl-wrap"><table id="tCom"></table></div></div></div>`;
   $('#tab').innerHTML=h;
   $('#teamSel').onchange=e=>{state.team=e.target.value;renderTab();};
   const ord=[...active].sort((x,y)=>y.ventas-x.ventas||y.demos-x.demos);
@@ -1207,8 +1683,12 @@ function tabComerciales(F){
     {key:'pNulas',label:'% nulas',fmt:(v,r)=>r.name!=='Total'&&v!=null&&avgN!=null&&v>avgN*1.5?`<span class="rate lo">${fmtP(v)}</span>`:fmtP(v)},
     {key:'demos',label:'Demos',fmt},{key:'demosD',label:'Demos / día',fmt:fmt1},{key:'ventas',label:'Ventas',fmt},{key:'ventasD',label:'Ventas / día',fmt:fmt1},
     {key:'pCierre',label:'% cierre',fmt:(v,r)=>r.name==='Total'?`<span class="rate">${fmtP(v)}</span>`:rateCell(v,avgC)},
+    ...(vBy?[{key:'crm',label:'Visitas CRM',fmt},{key:'pCrmSin',label:'% sin resultado CRM',fmt:fmtP}]:[]),
+    ...(eBy?[{key:'neta',label:'Netas',fmt:v=>v==null?'—':`<b>${fmt(v)}</b>`},{key:'abon',label:'Abonadas',fmt},{key:'pend',label:'Por confirmar',fmt}]:[]),
     ...srcs.flatMap(s=>[{key:'v_'+s,label:'Ventas '+s.toLowerCase(),fmt},{key:'c_'+s,label:'% cierre '+s.toLowerCase(),fmt:fmtP}]),
-  ],people,{sort:['ventas',-1],total:totalRow(recs,srcs,W)});
+  ],people,{sort:['ventas',-1],total:(()=>{const t=totalRow(recs,srcs,W);
+    if(vBy){const x=aggVis(people.flatMap(p=>vBy.get(p.name)||[]));t.crm=x.n;t.pCrmSin=pct(x.sinres,x.n);}
+    if(eBy){const x=aggVen(people.flatMap(p=>eBy.get(p.name)||[]));t.neta=x.neta;t.abon=x.abon;t.pend=x.pend;}return t;})()});
 }
 
 /* ============================== TAB: VIP ============================== */
@@ -1317,7 +1797,7 @@ function tabTec(F){
 
 /* ============================== TAB: CALIDAD ============================== */
 function computeWarnings(F){
-  const PW=[...state.parseWarnings.com,...state.parseWarnings.to,...state.parseWarnings.tec];
+  const PW=[...state.parseWarnings.com,...state.parseWarnings.to,...state.parseWarnings.tec,...(state.parseWarnings.ven||[]),...(state.parseWarnings.vis||[])];
   const W=PW.filter(w=>w.type!=='order').map(w=>({...w}));
   for(const[,ws]of groupBy(PW.filter(w=>w.type==='order'),w=>w.d+'|'+w.prev)){
     const aff=sum(ws,'affected');
@@ -1333,6 +1813,14 @@ function computeWarnings(F){
   if(u.length&&nu.length)W.push({lvl:'warn',msg:`«No localizado» en registros solo lo usan ${u.map(x=>esc(x.p)).join(', ')}; ${nu.map(x=>esc(x.p)).join(', ')} no lo marcan nunca. Sus bolsas de pendientes no son comparables.`});
   if(!state.files.to)W.push({lvl:'info',msg:'Falta el Excel de la Sala T.O.: sin él no hay registros ni leads entregados, citas ni «entregados por venta».'});
   if(!state.files.com)W.push({lvl:'info',msg:'Falta el Excel del Equipo Comercial: sin él no hay visitas, demos ni ventas.'});
+  const LD=lastDays();
+  if(LD.length>1&&new Set(LD.map(x=>x.d)).size>1)W.push({lvl:'warn',msg:`Los archivos no llegan al mismo día: ${LD.map(x=>`${x.l} hasta el ${dLabel(x.d)}`).join(' · ')}. Para comparar unos con otros, usa «Hasta el día común» en el periodo.`});
+  if(hasCom()){
+    for(const[k,lbl,rs]of[['ven','la Estadística',withPerson(F.ven).filter(r=>r.prod||r.est)],['vis','el CRM',withPerson(F.vis)]]){
+      const fuera=[...groupBy(rs.filter(r=>!r.ok),r=>r.name).entries()].map(([n,q])=>`${esc(n)} (${fmt(k==='vis'?sum(q,'n'):q.length)})`);
+      if(fuera.length)W.push({lvl:'info',msg:`${k==='vis'?'Usuarios del CRM':'Personas de la Estadística'} que no están en el cuadro de comerciales (no se les asigna equipo): ${fuera.join(', ')}.`});
+    }
+  }
   return W;
 }
 function tabCalidad(F){
@@ -1359,8 +1847,8 @@ window.addEventListener('drop',e=>{e.preventDefault();dragDepth=0;document.body.
 function setTab(id){if(!PAGES[id])return;state.tab=id;store.set('cb_tab',id);history.replaceState(null,'','#'+id);renderSide();renderHeader();renderTab();window.scrollTo({top:0,behavior:'smooth'});const on=$('#side .nav-i.on');if(on&&on.scrollIntoView&&window.innerWidth<=1000)on.scrollIntoView({inline:'center',block:'nearest'});}
 $('#side').addEventListener('click',e=>{const b=e.target.closest('.nav-i[data-tab]');if(b)setTab(b.dataset.tab);});
 window.addEventListener('hashchange',()=>{const id=hashTab();if(id&&id!==state.tab)setTab(id);});
-$('#filters').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;state.preset=b.dataset.p;state.range=b.dataset.p==='all'?null:{from:b.dataset.from,to:b.dataset.to};renderFilters();renderSide();renderTab();});
-$('#filters').addEventListener('change',e=>{if(e.target.id!=='dFrom'&&e.target.id!=='dTo')return;let f=$('#dFrom').value,t=$('#dTo').value;if(!f||!t)return;if(f>t)[f,t]=[t,f];state.preset='custom';state.range={from:f,to:t};renderFilters();renderSide();renderTab();});
+$('#filters').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;state.preset=b.dataset.p;state.range=b.dataset.p==="all"?null:{from:b.dataset.from,to:b.dataset.to};renderFilters();renderSide();renderHeader();renderTab();});
+$('#filters').addEventListener('change',e=>{if(e.target.id!=='dFrom'&&e.target.id!=='dTo')return;let f=$('#dFrom').value,t=$('#dTo').value;if(!f||!t)return;if(f>t)[f,t]=[t,f];state.preset='custom';state.range={from:f,to:t};renderFilters();renderSide();renderHeader();renderTab();});
 
 $('#vsel').onchange=e=>{
   const id=e.target.value;if(id==='__cur')return;
