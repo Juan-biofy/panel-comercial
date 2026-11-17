@@ -38,6 +38,9 @@ let html = readFileSync(src, 'utf8');
 const MARK = 'const CLOUD=/*__CLOUD__*/null;';
 if (!html.includes(MARK)) { console.error('No encuentro «' + MARK + '» en ' + src); process.exit(1); }
 
+const logoW = arg('logo-w');
+if (logoW) html = html.split('__LOGO_W__').join(readFileSync(logoW).toString('base64'));
+else if (html.includes('__LOGO_W__')) console.warn('Aviso: no has pasado --logo-w; el logo del modo oscuro saldrá roto.');
 if (logo) html = html.split('__LOGO__').join(readFileSync(logo).toString('base64'));
 else if (html.includes('__LOGO__')) console.warn('Aviso: no has pasado --logo; el logo saldrá roto.');
 

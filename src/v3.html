@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Culligan Biofy · Panel Comercial</title>
-<link rel="icon" href="data:image/svg+xml;base64,__LOGO__">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='#2968fe'/%3E%3Cpath d='M17 47V35M27 47V23M37 47V31M47 47V16' fill='none' stroke='white' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -37,7 +37,7 @@ a{color:var(--brand)}
 .top{background:rgba(255,255,255,.86);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
 .top .in{display:flex;align-items:center;gap:10px;min-height:var(--top);flex-wrap:wrap;padding:8px 20px}
 .brand{display:flex;align-items:center;gap:14px;margin-right:auto}
-.brand img{height:50px;width:auto;display:block}
+.brand img{height:32px;width:auto;display:block}
 .brand .sep{width:1px;height:28px;background:var(--line-2)}
 .brand .ttl{font-weight:500;color:var(--ink-3);font-size:13px;line-height:1.25}
 .brand .ttl b{display:block;color:var(--ink);font-weight:600;font-size:15px}
@@ -238,7 +238,7 @@ tr.zero td{color:var(--ink-3)}
 /* empty states */
 .welcome{padding:40px 20px 60px;max-width:1000px;margin:0 auto}
 .dropzone{border:1.5px dashed var(--line-2);border-radius:24px;background:var(--surface);padding:52px 24px;text-align:center;transition:.15s}
-.dropzone img{height:80px;margin-bottom:18px}
+.dropzone img{height:48px;max-width:100%;margin-bottom:18px}
 .dropzone h2{font-size:24px;margin-bottom:8px;letter-spacing:-.012em}
 .dropzone p{color:var(--ink-2);margin:6px 0}
 .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:26px auto 0;text-align:left;max-width:900px}
@@ -285,7 +285,7 @@ body.dragging #dropOverlay{display:grid}
 #lock{position:fixed;inset:0;z-index:100;background:radial-gradient(1200px 600px at 50% -10%,#e8f1fd 0%,var(--bg) 60%);display:grid;place-items:center;padding:24px}
 #lock.hidden{display:none}
 .lock-card{width:min(400px,100%);background:#fff;border-radius:24px;padding:36px 30px 28px;box-shadow:0 20px 60px rgba(0,0,0,.08);text-align:center;animation:fadeUp .6s var(--ease) both}
-.lock-card img{height:76px;margin-bottom:18px}
+.lock-card img{height:42px;margin-bottom:18px}
 .lock-card h2{font-size:21px;margin-bottom:4px}
 .lock-card p{color:var(--ink-3);font-size:13.5px;margin:0 0 20px}
 .lock-card input{width:100%;border:1px solid var(--line-2);border-radius:12px;padding:12px 14px;outline:none;font-size:15px;text-align:center}
@@ -329,7 +329,16 @@ body.dragging #dropOverlay{display:grid}
   .kpi .k-v{font-size:25px}
   .ph h1{font-size:24px}
   .brand .ttl,.brand .sep{display:none}
-  .brand img{height:40px}
+  .brand img{height:20px}
+  .brand{gap:8px}
+  .brand .tool-pill{padding:5px 10px;font-size:12.5px}
+}
+@media (max-width:480px){
+  .top .in{gap:6px;padding-left:12px;padding-right:12px}
+  .brand img{height:17px}
+  .brand{gap:6px}
+  .brand .tool-pill{padding:4px 9px;font-size:11.5px}
+  .top .in>.btn{padding-left:10px;padding-right:10px;min-width:0}
   .vsel{flex:1 1 100%;max-width:none;order:5}
   .btn .t-hide{display:none}
   .ostats{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -348,7 +357,7 @@ body.dragging #dropOverlay{display:grid}
   color-scheme:dark;
 }
 :root[data-theme="dark"] .top{background:rgba(16,18,24,.86)}
-:root[data-theme="dark"] .brand img,:root[data-theme="dark"] .lock-card img,:root[data-theme="dark"] .dropzone img{filter:brightness(0) invert(1)}
+:root[data-theme="dark"] .dropzone img{filter:brightness(0) invert(1)}
 :root[data-theme="dark"] .side{background:rgba(20,23,30,.6)}
 :root[data-theme="dark"] .nav-i:hover,:root[data-theme="dark"] .seg{background:#232833}
 :root[data-theme="dark"] .nav-i.on,:root[data-theme="dark"] .seg button.on{background:#2a303c;box-shadow:none}
@@ -366,9 +375,10 @@ body.dragging #dropOverlay{display:grid}
 :root{--sec:#2968fe}
 .g2:has(.tbl-wrap){grid-template-columns:1fr}
 .sec-soft{background:color-mix(in srgb,var(--sec) 10%,var(--surface))}
-/* logo vertical + etiqueta con el nombre de la herramienta */
+/* logo horizontal (azul en claro, blanco en oscuro) + etiqueta con el nombre de la herramienta */
+.lg-d{display:none!important}:root[data-theme="dark"] .lg-l{display:none!important}:root[data-theme="dark"] .lg-d{display:block!important}
 .tool-pill{display:inline-flex;align-items:center;background:var(--brand-soft);color:var(--brand);font-weight:700;border-radius:99px;padding:7px 16px;font-size:14.5px;white-space:nowrap}
-.lock-brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:18px}
+.lock-brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
 .lock-brand img{margin-bottom:0!important}
 /* menú */
 .nav-h{display:flex;align-items:center;gap:7px}
@@ -475,7 +485,7 @@ body.dragging #dropOverlay{display:grid}
 <body>
 <div id="lock" class="hidden">
   <form class="lock-card" id="lockForm" autocomplete="on">
-    <div class="lock-brand"><img src="data:image/svg+xml;base64,__LOGO__" alt="Culligan Biofy"><span class="tool-pill">Dashboard</span></div>
+    <div class="lock-brand"><img class="lg-l" src="data:image/svg+xml;base64,__LOGO__" alt="Culligan Biofy"><img class="lg-d" src="data:image/svg+xml;base64,__LOGO_W__" alt="Culligan Biofy"><span class="tool-pill">Dashboard</span></div>
     <h2>Panel comercial</h2>
     <p>Introduce la contraseña para ver los datos</p>
     <input type="text" name="username" value="panel" autocomplete="username" hidden>
@@ -489,7 +499,7 @@ body.dragging #dropOverlay{display:grid}
 <header class="top">
   <div class="in">
     <div class="brand">
-      <img src="data:image/svg+xml;base64,__LOGO__" alt="Culligan Biofy">
+      <img class="lg-l" src="data:image/svg+xml;base64,__LOGO__" alt="Culligan Biofy"><img class="lg-d" src="data:image/svg+xml;base64,__LOGO_W__" alt="Culligan Biofy">
       <span class="tool-pill">Dashboard</span>
     </div>
     <label class="vsel hidden" id="vselWrap" title="Elige qué versión ver"><span class="lb">Versión</span><select id="vsel"></select></label>
