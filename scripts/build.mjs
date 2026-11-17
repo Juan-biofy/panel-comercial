@@ -47,19 +47,22 @@ else if (html.includes('__LOGO__')) console.warn('Aviso: no has pasado --logo; e
 let cloud = null;
 if (!flag('local')) {
   const S = JSON.parse(readFileSync(arg('secrets', 'secretos.json'), 'utf8'));
-  for (const k of ['owner', 'repo', 'pw_jefe', 'pw_admin', 'read_token', 'write_token'])
+  for (const k of ['owner', 'repo', 'read_token', 'write_token'])
     if (!S[k]) { console.error('Falta «' + k + '» en el fichero de secretos'); process.exit(1); }
-  cloud = {
-    owner: S.owner, repo: S.repo, branch: S.branch || 'main', dir: S.dir || 'versiones',
-    read: await encrypt(S.pw_jefe, S.read_token),
-    jsave: await encrypt(S.pw_jefe, S.write_token),
-    write: await encrypt(S.pw_admin, S.write_token),
-  };
-  // comprobación: cada contraseña abre lo que debe
-  const ok = (await decrypt(cloud.read, S.pw_jefe)) === S.read_token
-    && (await decrypt(cloud.jsave, S.pw_jefe)) === S.write_token
-    && (await decrypt(cloud.write, S.pw_admin)) === S.write_token
-    && (await decrypt(cloud.write, S.pw_jefe)) === null;
+  // Sistema único de contraseñas (17/11): una por persona, desde el archivo de accesos común
+  const accP = arg('accesos');
+  if (!accP) { console.error('Falta --accesos /Users/diseno/claves-biofy/accesos.json'); process.exit(1); }
+  const U = JSON.parse(readFileSync(accP, 'utf8')).usuarios.filter(u => u.webs && u.webs.dashboard);
+  const jefes = U.filter(u => u.webs.dashboard === 'jefe'), admins = U.filter(u => u.webs.dashboard === 'admin');
+  cloud = { owner: S.owner, repo: S.repo, branch: S.branch || 'main', dir: S.dir || 'versiones', jefes: [], admins: [] };
+  // los jefes pueden guardar versiones (como antes con «jsave»); quita «w» para que no puedan
+  for (const u of jefes) cloud.jefes.push(await encrypt(u.pw, JSON.stringify({ r: S.read_token, w: S.write_token })));
+  for (const u of admins) cloud.admins.push(await encrypt(u.pw, S.write_token));
+  let ok = true;
+  const abre = async (l, pw) => { for (const x of l) { const t = await decrypt(x, pw); if (t) return t; } return null; };
+  for (const u of jefes) ok = ok && JSON.parse(await abre(cloud.jefes, u.pw)).r === S.read_token && !(await abre(cloud.admins, u.pw));
+  for (const u of admins) ok = ok && (await abre(cloud.admins, u.pw)) === S.write_token;
+  console.log(`Personas: ${jefes.length} jefe · ${admins.length} administrador`);
   if (!ok) { console.error('La comprobación del cifrado ha fallado'); process.exit(1); }
 }
 html = html.replace(MARK, 'const CLOUD=' + JSON.stringify(cloud) + ';');

@@ -1237,7 +1237,7 @@ let versions=[];
 const charts={};
 
 /* ============================== CLOUD (GitHub) ============================== */
-const CLOUD={"owner":"Juan-biofy","repo":"panel-datos","branch":"main","dir":"versiones","read":{"n":600000,"s":"YQl3lLjAbm2Y7qIEv8Shbw==","i":"2uGvb+TfWUlkzHtt","c":"aSZkDrGXPZjiG6YAH9t76qLW0rHd6Yj77hsJ2egNvLbE4BbhbCvZHUkKXlQPeyuU8VdOjUBAkZLll8CwzjtY50MkdYg79/TPkliPFxXqTfOwNGx2MJ29SJ15ora3K0b8xYhUVHhcSlsl1/u7hw=="},"jsave":{"n":600000,"s":"ganSyn3TA0BPGmN2dvW+0g==","i":"moj9CmHKRoXOytZe","c":"2N7q3CDiG+RAna9EgrjwtwhqrgM6j7ZWtJjBD4zxuSGC3rQofTN0wbhxO158Wm/EDwZ9f7O+kGiJSuVkUjXD8OQs4M3ZYPTQOx/mGp+wiMVMWpJZdxY2y6MeYtw+H8ItIDPd25MvY7jCEW8CPw=="},"write":{"n":600000,"s":"qv3jsRKx/AoDyLFKOgrM8Q==","i":"mngyFkW2mF4LAQw1","c":"4Vho2qxvOgORTtElbEW9RMBX1tgGmPZFsjrsDwJp9NVfCp8sXGClyaJfgqFM+GbBkGHx+msvXnhAUVDuuDWAKeD4wCeN1GgdBVZbrnF2kzHk105UKaVRtl7Oyvwv/P7gGV2cVr82wMsm6Prf/w=="}};
+const CLOUD={"owner":"Juan-biofy","repo":"panel-datos","branch":"main","dir":"versiones","jefes":[{"n":600000,"s":"GJo2Ep3kcSOKSF9Z0uD7mQ==","i":"/ry3hvKLMG00aOJc","c":"hIw15D3Sw7C/uT9tlol7ceP5Ux0iGm9SgB1nJgLLiNuF6Y2bxAn4O1ZEi664qqgUHMdFzBmaGkHUlmm4FUzpCaNH/nsGpcDCN4AGKBY7K0ygR5sSY/enERg1peUUSk3LVRZbo+GoTreVCE1hcPfozVP1lrKalIBBCgUJJLSmjNq635bVqb/YZbrnMjTGTLVlNWRBiCE08JnrzzV6wJvzH5FCAitk7ibL6Ys/X9e1TDSIsgBJ2lzUOqt1r/iC6zhnhTEKoWCPHASXoI7jaPZaxh9m5dmxbb0lcw=="}],"admins":[{"n":600000,"s":"gXLSihcBscQbhhJP9KFdCg==","i":"hpD8Zhn1hRaZEagd","c":"402218du9s4cySqup9T43XTr3Swwe1yYVbhPUQlKontDzJiumN9agvYTYJSSDlHlHMBitbLCQ3ZSJMJqW7eRRsg3nAijab8lEuz/zKd11/RbgUpii8hIem9+Tj5d9aaJnxPNPHak17YmBRPxgA=="},{"n":600000,"s":"lWSglZnI6/p4Ad7Eq7dw0A==","i":"CeaUrtOvpTe94wbU","c":"qW2+iV86wtIqPf2s8R8+A8SOsymZrdP3ItxIjqubGaeZnKOEyyGGFgB0NPwosTKxzAQFgkktM+WKv9xncBXNmkgMnsgSJ3rooVrkbaHZZA3lzyqZ6AjuNcLhIvdAVuo4QXotdwm3IRx2+1KLKg=="},{"n":600000,"s":"CfUDEtqkqwfoLO7y5VuSQQ==","i":"mckTEo5ZgKnT3LFm","c":"K8gf6iGqhxjfalQx3F4U2Ylq+m6IpfFrkl7A0txSFDg66Pt9+gbQC6lyNhwEDPwwyLH3n3o0MVaOnMiO1uIheNZu9fRI1raKRGxlFgl4UC8mvBmny6jc0Xm+24M6PkoftKiJKvLG88U2wk7hBg=="},{"n":600000,"s":"ulhQEqI7Npvg7UUoqKlioA==","i":"KwI5O+VEwdYj7B/l","c":"ewbW2FzSDBst1y4fgKqRyHTunw5rKUG9RBpIWfIC4f6zhIMvslO/KqrZ08xB0PeaVDAwO8A2atA+3UJRvSS7NZCd9JVxRXrPILyCOJFTEpgAWSnAIJhY6O19mXhYg+VCDj/KGcZLl5aRadKOjg=="}]};
 const cloudOn=!!(CLOUD&&CLOUD.owner&&CLOUD.repo);
 const gh={read:null,write:null,role:null};
 const b64e=str=>{const b=new TextEncoder().encode(str);let s='';for(let i=0;i<b.length;i+=0x8000)s+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000));return btoa(s);};
@@ -2196,7 +2196,7 @@ $('#verList').addEventListener('click',async e=>{
 $('#adminBox').addEventListener('submit',async e=>{
   if(e.target.id!=='admForm')return;e.preventDefault();
   const pw=$('#admPw').value;if(!pw)return;
-  const t=await decryptBlob(CLOUD.write,pw);
+  const t=await primero(CLOUD.admins,pw);
   if(!t){toast('Contraseña de administrador incorrecta');$('#admPw').select();return;}
   gh.write=t;gh.role='admin';store.set('cb_write',t);store.set('cb_role','admin');renderVersionList();renderVersionSelect();toast('Modo administrador activado');
 });
@@ -2229,13 +2229,16 @@ async function startCloud(){
   if(versions.length){try{loadSnapshot(await cloud.get(versions[0].id));}catch(e){render();toast(ghErrMsg(e));}}else render();
   return true;
 }
+// Una contraseña por persona (17/11): se prueba con cada bloque hasta que uno abre
+async function primero(lista,pw){for(const b of lista||[]){const t=await decryptBlob(b,pw);if(t)return t;}return null;}
 function showLock(msg){$('#lock').classList.remove('hidden');$('#lockErr').textContent=msg||'';setTimeout(()=>$('#lockPw').focus(),50);}
 $('#lockForm').addEventListener('submit',async e=>{
   e.preventDefault();const pw=$('#lockPw').value;if(!pw)return;
   const btn=$('#lockBtn');btn.disabled=true;btn.textContent='Comprobando…';$('#lockErr').textContent='';
-  let read=await decryptBlob(CLOUD.read,pw),write=null,role=null;
-  if(read){role='jefe';write=await decryptBlob(CLOUD.jsave,pw);}
-  else{const w=await decryptBlob(CLOUD.write,pw);if(w){read=w;write=w;role='admin';}}
+  let read=null,write=null,role=null;
+  const j=await primero(CLOUD.jefes,pw);
+  if(j){try{const o=JSON.parse(j);read=o.r;write=o.w||null;role='jefe';}catch(e){}}
+  else{const w=await primero(CLOUD.admins,pw);if(w){read=w;write=w;role='admin';}}
   if(!read){btn.disabled=false;btn.textContent='Entrar';$('#lockErr').textContent='Contraseña incorrecta';const c=$('.lock-card');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');$('#lockPw').select();return;}
   gh.read=read;gh.write=write;gh.role=role;
   store.set('cb_read',read);store.set('cb_role',role);

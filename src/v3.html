@@ -2196,7 +2196,7 @@ $('#verList').addEventListener('click',async e=>{
 $('#adminBox').addEventListener('submit',async e=>{
   if(e.target.id!=='admForm')return;e.preventDefault();
   const pw=$('#admPw').value;if(!pw)return;
-  const t=await decryptBlob(CLOUD.write,pw);
+  const t=await primero(CLOUD.admins,pw);
   if(!t){toast('Contraseña de administrador incorrecta');$('#admPw').select();return;}
   gh.write=t;gh.role='admin';store.set('cb_write',t);store.set('cb_role','admin');renderVersionList();renderVersionSelect();toast('Modo administrador activado');
 });
@@ -2229,13 +2229,16 @@ async function startCloud(){
   if(versions.length){try{loadSnapshot(await cloud.get(versions[0].id));}catch(e){render();toast(ghErrMsg(e));}}else render();
   return true;
 }
+// Una contraseña por persona (17/11): se prueba con cada bloque hasta que uno abre
+async function primero(lista,pw){for(const b of lista||[]){const t=await decryptBlob(b,pw);if(t)return t;}return null;}
 function showLock(msg){$('#lock').classList.remove('hidden');$('#lockErr').textContent=msg||'';setTimeout(()=>$('#lockPw').focus(),50);}
 $('#lockForm').addEventListener('submit',async e=>{
   e.preventDefault();const pw=$('#lockPw').value;if(!pw)return;
   const btn=$('#lockBtn');btn.disabled=true;btn.textContent='Comprobando…';$('#lockErr').textContent='';
-  let read=await decryptBlob(CLOUD.read,pw),write=null,role=null;
-  if(read){role='jefe';write=await decryptBlob(CLOUD.jsave,pw);}
-  else{const w=await decryptBlob(CLOUD.write,pw);if(w){read=w;write=w;role='admin';}}
+  let read=null,write=null,role=null;
+  const j=await primero(CLOUD.jefes,pw);
+  if(j){try{const o=JSON.parse(j);read=o.r;write=o.w||null;role='jefe';}catch(e){}}
+  else{const w=await primero(CLOUD.admins,pw);if(w){read=w;write=w;role='admin';}}
   if(!read){btn.disabled=false;btn.textContent='Entrar';$('#lockErr').textContent='Contraseña incorrecta';const c=$('.lock-card');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');$('#lockPw').select();return;}
   gh.read=read;gh.write=write;gh.role=role;
   store.set('cb_read',read);store.set('cb_role',role);
